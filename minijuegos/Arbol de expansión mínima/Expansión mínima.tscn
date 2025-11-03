@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpwmumtklv5pu"]
+
+[ext_resource type="Script" uid="uid://dyoru4c5pipjr" path="res://minijuegos/Arbol de expansión mínima/expansión_mínima.gd" id="1_ld67p"]
+
+[node name="ExpansiónMínima" type="Node2D"]
+script = ExtResource("1_ld67p")
