@@ -1,0 +1,34 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpwmumtklv5pu"]
+
+[ext_resource type="Script" uid="uid://dyoru4c5pipjr" path="res://minijuegos/Arbol de expansión mínima/expansión_mínima.gd" id="1_ld67p"]
+
+[node name="ExpansiónMínima" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_ld67p")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="NewButton" type="Button" parent="CanvasLayer"]
+offset_left = 163.0
+offset_top = 334.0
+offset_right = 389.0
+offset_bottom = 426.0
+
+[node name="CheckButton" type="Button" parent="CanvasLayer"]
+offset_left = 161.0
+offset_top = 501.0
+offset_right = 382.0
+offset_bottom = 606.0
+
+[node name="HintButton" type="Button" parent="CanvasLayer"]
+offset_left = 744.0
+offset_top = 334.0
+offset_right = 969.0
+offset_bottom = 431.0
+
+[node name="ClearButton" type="Button" parent="CanvasLayer"]
+offset_left = 746.0
+offset_top = 506.0
+offset_right = 975.0
+offset_bottom = 604.0
