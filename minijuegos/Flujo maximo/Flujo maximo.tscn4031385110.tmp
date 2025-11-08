@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://et5bp527w38s"]
+
+[ext_resource type="Script" uid="uid://cydb7obiv0ls" path="res://minijuegos/Flujo maximo/flujo_maximo.gd" id="1_uhwsw"]
+
+[node name="FlujoMaximo" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_uhwsw")
+
+[node name="NewButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 26.0
+offset_top = 561.0
+offset_right = 212.0
+offset_bottom = 621.0
+text = "Generar nuevo grafo"
+
+[node name="ClearButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 945.0
+offset_top = 554.0
+offset_right = 1110.0
+offset_bottom = 616.0
+text = "Limpiar"
+
+[node name="CheckButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 487.0
+offset_top = 560.0
+offset_right = 664.0
+offset_bottom = 619.0
+text = "Verificar algoritmo"
+
+[node name="InfoLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 2.0
+offset_right = 855.0
+offset_bottom = 76.0
+text = "test"
