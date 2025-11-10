@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dhvubbg6o5e25"]
+
+[ext_resource type="Script" uid="uid://dxq1hv6uvpqh3" path="res://minijuegos/BFS DFS/bfs_dfs.gd" id="1_68hiw"]
+
+[node name="BfsDfs" type="Node2D"]
+script = ExtResource("1_68hiw")
