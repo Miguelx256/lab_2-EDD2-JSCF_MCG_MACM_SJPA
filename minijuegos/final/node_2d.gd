@@ -1,47 +1,36 @@
 extends Node2D
 
-var nodes = []          # Posiciones de nodos
-var edges = []          # Aristas (pares de índices)
-var selected_nodes = [] # Índices de nodos seleccionados
-var node_radius = 15
+var nodo_id: int = 0
+var radio: float = 20
+var seleccionado: bool = false
+var color: Color
+
+# Fuente interna de Godot
+var font
+
+signal nodo_seleccionado(nodo_id)
 
 func _ready():
-	set_process_input(true)
-
-func set_graph(_nodes, _edges):
-	nodes = _nodes
-	edges = _edges
-	selected_nodes.clear()
-	queue_redraw()
+	font = ThemeDB.fallback_font
 
 func _draw():
-	# Dibujar aristas
-	for e in edges:
-		draw_line(nodes[e[0]], nodes[e[1]], Color.WHITE, 2)
-	
-	# Dibujar nodos
-	for i in range(nodes.size()):
-		var pos = nodes[i]
-		var color = Color(0.2, 0.6, 1)
-		if i in selected_nodes:
-			color = Color(0, 1, 0) # verde si está seleccionado
-		draw_circle(pos, node_radius, color)
+	color = Color.GREEN if seleccionado else Color.RED
+	draw_circle(Vector2.ZERO, radio, color)
 
-		var font = get_theme_font("font")
-		if font:
-			draw_string(font, pos + Vector2(-6, -15), char(65 + i), Color.WHITE)
+	draw_string(
+		font,
+		Vector2(-8, -radio - 5),
+		str(nodo_id),
+		0,      # Alineación
+		-1,     # Ancho
+		22,     # Tamaño
+		Color.WHITE
+	)
 
 func _input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var mouse_pos = event.position
-		for i in range(nodes.size()):
-			if mouse_pos.distance_to(nodes[i]) < node_radius:
-				_toggle_selection(i)
-				queue_redraw()
-				break
-
-func _toggle_selection(i):
-	if i in selected_nodes:
-		selected_nodes.erase(i)
-	else:
-		selected_nodes.append(i)
+		var mouse_pos = to_local(event.position)
+		if mouse_pos.length() <= radio:
+			seleccionado = not seleccionado
+			emit_signal("nodo_seleccionado", nodo_id)
+			queue_redraw()
