@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://dhvubbg6o5e25"]
+
+[ext_resource type="Script" uid="uid://dxq1hv6uvpqh3" path="res://minijuegos/BFS DFS/bfs_dfs.gd" id="1_68hiw"]
+
+[node name="NodoServidor" type="Node2D"]
+script = ExtResource("1_68hiw")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 66.0
+offset_bottom = 56.0
+color = Color(1, 0.69803923, 0.38431373, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_left = 4.0
+offset_top = 15.0
+offset_right = 42.0
+offset_bottom = 38.0

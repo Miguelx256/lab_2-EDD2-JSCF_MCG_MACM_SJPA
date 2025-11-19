@@ -1,4 +1,5 @@
-# nodo.gd
+# Nodo.gd
+extends Node
 class_name Nodo
 
 static var cid: int = 0
@@ -6,7 +7,7 @@ static var cid: int = 0
 var adyacente: Dictionary = {}  # Nodo -> peso
 var dato: String
 var id: int
-var  nodoInfectado: bool
+var nodoInfectado: bool = false
 
 func _init(_dato: String = ""):
 	dato = _dato

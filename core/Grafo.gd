@@ -1,8 +1,8 @@
-# grafo.gd
-class_name Grafo
+# Grafo.gd
 extends Node
+class_name Grafo
 
-const Nodo = preload("res://core/Nodo.gd")   # ← Ajusta la ruta real
+const Nodo = preload("res://core/Nodo.gd")   # Ajusta la ruta si es necesario
 
 var matriz_adyacencia: Array = []
 var lista_adyacencia: Array[Nodo] = []
@@ -15,6 +15,7 @@ func _init():
 func agregar_nodo(nodo: Nodo) -> void:
 	if nodo not in lista_adyacencia:
 		lista_adyacencia.append(nodo)
+
 
 func conectar_nodo(n1: Nodo, n2: Nodo, peso: float = 1.0) -> void:
 	# Inicializar matriz si está vacía
@@ -32,8 +33,8 @@ func conectar_nodo(n1: Nodo, n2: Nodo, peso: float = 1.0) -> void:
 	n2.agregar_adyacente(n1, peso)
 
 	# Conexión en matriz con peso
-	var u:int = int(n1.id)
-	var v:int = int(n2.id)
+	var u: int = int(n1.id)
+	var v: int = int(n2.id)
 
 	matriz_adyacencia[u][v] = peso
 	matriz_adyacencia[v][u] = peso

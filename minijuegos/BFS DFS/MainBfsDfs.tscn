@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://2066tby8xgh4"]
+
+[ext_resource type="Script" uid="uid://uqfuccewecvf" path="res://minijuegos/BFS DFS/main_bfs_dfs.gd" id="1_yqpqw"]
+
+[node name="MainBfsDfs" type="Node2D"]
+script = ExtResource("1_yqpqw")
+
+[node name="graph" type="Node2D" parent="."]
+
+[node name="bfs button" type="Button" parent="."]
+offset_left = 956.0
+offset_top = 132.0
+offset_right = 1149.0
+offset_bottom = 189.0
+
+[node name="dfs button" type="Button" parent="."]
+offset_left = 957.0
+offset_top = 232.0
+offset_right = 1151.0
+offset_bottom = 283.0
+
+[node name="Label" type="Label" parent="."]
+offset_left = 106.0
+offset_top = 15.0
+offset_right = 181.0
+offset_bottom = 38.0
+text = "aaaaaaaa"
+
+[node name="Label2" type="Label" parent="."]
+offset_left = 1038.0
+offset_top = 147.0
+offset_right = 1078.0
+offset_bottom = 170.0
+text = "BFS"
+
+[node name="Label3" type="Label" parent="."]
+offset_left = 1033.0
+offset_top = 245.0
+offset_right = 1069.0
+offset_bottom = 268.0
+text = "DFS"
+
+[node name="Label4" type="Label" parent="."]
+offset_left = 102.0
+offset_top = 55.0
+offset_right = 177.0
+offset_bottom = 78.0
