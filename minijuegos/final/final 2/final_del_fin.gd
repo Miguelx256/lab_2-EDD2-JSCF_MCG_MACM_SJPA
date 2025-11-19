@@ -3,7 +3,7 @@ extends Node2D
 @onready var grafo_visual: Node2D = $CanvasLayer/Node2D
 @onready var Grafo = preload("res://core/Grafo.gd")
 @onready var Nodo = preload("res://core/Nodo.gd")
-
+#prueba
 var grafo
 var etapa_mision_final: int = 1
 var pantalla_ancho: int = 1152
