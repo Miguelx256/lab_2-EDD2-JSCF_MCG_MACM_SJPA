@@ -55,9 +55,12 @@ func _draw() -> void:
 				font,
 				mid,
 				etiqueta,
-				Color.YELLOW,
-				16
+				HORIZONTAL_ALIGNMENT_LEFT,  # o CENTER, RIGHT, etc.
+				-1.0,                       # width (déjalo en -1 si no quieres limitar)
+				16,                         # font_size
+				Color.YELLOW                # color del texto
 			)
+
 
 	# ==========================
 	# DIBUJAR NODOS
@@ -71,6 +74,8 @@ func _draw() -> void:
 			font,
 			pos + Vector2(-6, 6),
 			nodo.dato,
-			Color.BLACK,
-			16
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1.0,
+			16,
+			Color.BLACK
 		)

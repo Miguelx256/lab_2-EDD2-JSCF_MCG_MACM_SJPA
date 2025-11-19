@@ -34,10 +34,13 @@ var goal_node:int = -1
 @onready var clear_btn :Button = $ClearButton
 @onready var check_btn :Button = $CheckButton
 @onready var info_lbl  :Label  = $InfoLabel
+@onready var next_lvl  :Button = $NextLvl
+
 
 func _ready():
 	randomize()
 
+	next_lvl.hide()
 	new_btn.pressed.connect(_crear_grafo)
 	clear_btn.pressed.connect(_clear)
 	check_btn.pressed.connect(_check)
@@ -157,7 +160,15 @@ func _check():
 		+ ("GANASTE 🎉" if win else "PERDISTE ❌")
 	) % [str(camino_jugador), player_cost, str(dijkstra_path), dijkstra_cost]
 
+	# --- ocultar botones si gana ---
+	if win:
+		clear_btn.hide()
+		check_btn.hide()
+		next_lvl.show()
+		# también podrías desactivar otros inputs aquí si quieres
+
 	queue_redraw()
+
 
 # -------------------------------------------------------------
 # COSTO DEL CAMINO DEL JUGADOR
@@ -264,3 +275,7 @@ func _draw():
 
 	# Fin (rojo)
 	draw_circle(posiciones[nodos[goal_node]], NODE_RADIUS + 4.0, Color.RED)
+
+
+func _on_next_lvl_button_down() -> void:
+	get_tree().change_scene_to_file("res://minijuegos/Arbol de expansión mínima/Expansión mínima.tscn")

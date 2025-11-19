@@ -46,3 +46,13 @@ text = "a"
 [node name="AlgoPopup" type="PopupPanel" parent="."]
 oversampling_override = 1.0
 visible = true
+
+[node name="NextLVL" type="Button" parent="."]
+layout_mode = 0
+offset_left = 949.0
+offset_top = 17.0
+offset_right = 1130.0
+offset_bottom = 76.0
+text = "Sig. Nivel"
+
+[connection signal="button_down" from="NextLVL" to="." method="_on_next_lvl_button_down"]

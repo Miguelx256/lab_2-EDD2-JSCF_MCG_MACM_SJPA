@@ -37,3 +37,13 @@ text = "CHECK"
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
+
+[node name="NextLvl" type="Button" parent="."]
+layout_mode = 0
+offset_left = 896.0
+offset_top = 463.0
+offset_right = 1024.0
+offset_bottom = 527.0
+text = "NEXT LEVEL"
+
+[connection signal="button_down" from="NextLvl" to="." method="_on_next_lvl_button_down"]

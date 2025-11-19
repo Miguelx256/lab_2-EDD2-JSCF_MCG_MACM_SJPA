@@ -18,6 +18,8 @@ const SOURCE_COLOR        : Color = Color(0.10, 0.25, 0.90)  # azul oscuro
 const SINK_COLOR          : Color = Color(0.20, 0.85, 0.40)  # verde
 const NODE_BASE_INNER     : Color = Color(0.92, 0.96, 1.00)
 const NODE_BASE_BORDER    : Color = Color(0.15, 0.20, 0.28)
+@onready var next_lvl: Button = $NextLVL
+
 
 const SUCCESS_MSG := "Flujo seguro establecido. El ataque ha sido contenido. NEMESIS ha sido aislado"
 
@@ -66,6 +68,7 @@ var G_res: Array = []                 # Array<Array<REdge>>
 
 func _ready() -> void:
 	randomize()
+	next_lvl.hide()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 
@@ -206,12 +209,22 @@ func _on_check() -> void:
 	var header := "{0}\n{1}".format([_hud_text(), _algo_brief()])
 	var detail := "Flujo máximo con (S={0}, T={1}): {2}".format([s, t, max_flow])
 	var compare := "Máximo global posible: {0}".format([best_flow])
-	var verdict := (SUCCESS_MSG if is_optimal else "Par no óptimo. Prueba otros nodos como fuente/sumidero.")
+
+	var verdict: String
+	if is_optimal:
+		verdict = SUCCESS_MSG          # tu mensaje de victoria
+		next_lvl.show()                # 👈 mostrar botón al ganar
+	else:
+		verdict = "Par no óptimo. Prueba otros nodos como fuente/sumidero."
+		next_lvl.hide()                # 👈 ocultarlo si no es óptimo
 
 	info_cache = "{0}\n\n{1}\n{2}\n\n{3}".format([header, detail, compare, verdict])
-	if info_lbl: info_lbl.text = info_cache
+	if info_lbl:
+		info_lbl.text = info_cache
 	freeze_info = true
 	queue_redraw()
+
+
 
 # ---------- Utilidades verificación ----------
 func _global_max_flow_value() -> int:
@@ -455,3 +468,11 @@ func _clear_all() -> void:
 
 func _process(_dt: float) -> void:
 	_update_info()
+
+
+func _on_clear_button_2_button_down() -> void:
+	pass # Replace with function body.
+
+
+func _on_next_lvl_button_down() -> void:
+	pass # Replace with function body.

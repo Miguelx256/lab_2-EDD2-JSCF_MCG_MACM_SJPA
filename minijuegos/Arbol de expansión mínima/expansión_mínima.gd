@@ -44,6 +44,8 @@ var info_cache  : String = ""
 @onready var check_btn : Button = get_node_or_null("CheckButton")
 @onready var clear_btn : Button = get_node_or_null("ClearButton")
 @onready var info_lbl  : Label  = get_node_or_null("InfoLabel")
+@onready var next_lvl: Button = $NextLVL
+
 
 # Popup de selección de algoritmo (creado por código)
 var algo_popup: PopupPanel
@@ -52,6 +54,7 @@ var kruskal_btn: Button
 
 func _ready() -> void:
 	randomize()
+	next_lvl.hide()
 	_connect_buttons()
 	_create_algo_popup()
 	algo_popup.popup_centered()   # elegir algoritmo al inicio
@@ -391,17 +394,23 @@ func _on_check() -> void:
 	var res := _validate_selection()
 	var status_text := "¡Ganaste, has reeconstruido los servidores!" if res.code == "OK" else "Has fallado la misión..."
 	var detail := ""
+	
 	match res.code:
 		"OK":
 			detail = "Costo: {0} (óptimo: {1})".format([res.cost, mst_cost])
+			next_lvl.show()  # 👈 mostrar botón al ganar
 		"NOT_N_MINUS_1":
 			detail = "Debes seleccionar exactamente {0} aristas, seleccionaste {1}.".format([NODE_COUNT - 1, res.count])
+			next_lvl.hide()
 		"DISCONNECTED":
 			detail = "Tu selección no conecta todos los nodos (el grafo no es conexo)."
+			next_lvl.hide()
 		"CYCLE":
 			detail = "Tu selección forma ciclos; un árbol no puede tener ciclos."
+			next_lvl.hide()
 		"NOT_MIN":
 			detail = "Tu árbol no es mínimo. Tu costo: {0} | Óptimo: {1}".format([res.cost, mst_cost])
+			next_lvl.hide()
 
 	reveal_mst = true
 	freeze_info = true
@@ -411,6 +420,7 @@ func _on_check() -> void:
 	if info_lbl:
 		info_lbl.text = info_cache
 	queue_redraw()
+
 
 func _validate_selection() -> Dictionary:
 	var sel_idxs: Array[int] = []
@@ -526,3 +536,7 @@ func _process(_dt: float) -> void:
 		info_lbl.text = info_cache
 	else:
 		info_lbl.text = "{0}\n{1}".format([_hud_text(), _algo_brief()])
+
+
+func _on_next_lvl_button_down() -> void:
+	get_tree().change_scene_to_file("res://minijuegos/Flujo maximo/Flujo maximo.tscn")
