@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://chr26erbynao6"]
+
+[ext_resource type="Script" uid="uid://0ivywkrclma1" path="res://DIJKSTRA.gd" id="1_pxyci"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_pxyci")
+
+[node name="NewButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1424.0
+offset_top = 456.0
+offset_right = 1552.0
+offset_bottom = 520.0
+text = "NEW"
+
+[node name="ClearButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 896.0
+offset_top = 384.0
+offset_right = 1024.0
+offset_bottom = 448.0
+text = "CLEAR"
+
+[node name="CheckButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 896.0
+offset_top = 302.0
+offset_right = 1024.0
+offset_bottom = 366.0
+text = "CHECK"
+
+[node name="InfoLabel" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0

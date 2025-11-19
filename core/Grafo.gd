@@ -32,5 +32,8 @@ func conectar_nodo(n1: Nodo, n2: Nodo, peso: float = 1.0) -> void:
 	n2.agregar_adyacente(n1, peso)
 
 	# Conexión en matriz con peso
-	matriz_adyacencia[n1.id][n2.id] = peso
-	matriz_adyacencia[n2.id][n1.id] = peso
+	var u:int = int(n1.id)
+	var v:int = int(n2.id)
+
+	matriz_adyacencia[u][v] = peso
+	matriz_adyacencia[v][u] = peso

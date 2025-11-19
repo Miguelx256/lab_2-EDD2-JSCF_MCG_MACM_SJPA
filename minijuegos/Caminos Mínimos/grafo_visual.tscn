@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bt6l5md1d4lq2"]
+
+[ext_resource type="Script" uid="uid://uw8wtvg8drjl" path="res://GrafoVisual.gd" id="1_e7mf2"]
+
+[node name="GrafoVisual" type="Node2D"]
+script = ExtResource("1_e7mf2")
