@@ -1,7 +1,10 @@
-#logica para mision arbol de expansión mínima 
+# lógica para misión Árbol de Expansión Mínima (AEM) usando Grafo/Nodo
 extends Control
 
-const NODE_COUNT      : int = 5          # número de nodos (ANTES: 7)
+const Grafo = preload("res://core/Grafo.gd")
+const Nodo  = preload("res://core/Nodo.gd")
+
+const NODE_COUNT      : int = 5          # número de nodos
 const EXTRA_EDGES     : int = 4          # aristas extra además del árbol base
 const NODE_RADIUS     : float = 16.0
 const EDGE_THICKNESS  : float = 3.0
@@ -11,7 +14,7 @@ const MARGIN          : float = 64.0
 enum Algo { KRUSKAL, PRIM }
 var current_algo: Algo = Algo.KRUSKAL
 
-# ---------- estructura de una arista ----------
+# ---------- estructura de una arista para el AEM/dibujo ----------
 class Edge:
 	var a:int
 	var b:int
@@ -20,14 +23,21 @@ class Edge:
 	func _init(_a:int,_b:int,_w:int):
 		a = _a; b = _b; w = _w
 
-var nodes : Array[Vector2] = []
-var edges : Array[Edge] = []
+# ---------- Estado gráfico ----------
+var nodes_pos : Array[Vector2] = []      # posiciones de nodos (índice compacto 0..N-1)
+var edges     : Array[Edge]     = []      # aristas sin duplicados (a<b)
 
-var mst_indices : PackedInt32Array = []  # índices de edges del AEM
+# ---------- Estado de Grafo/Nodo ----------
+var g: Grafo
+var nodos: Array[Nodo] = []               # lista de Nodos (en orden compacto)
+var id2idx: Dictionary = {}               # Nodo.id -> índice compacto 0..N-1
+
+# ---------- Resultado AEM / HUD ----------
+var mst_indices : PackedInt32Array = []   # índices de edges del AEM
 var mst_cost    : int = 0
-var reveal_mst  : bool = false           # mostrar AEM tras verificar
-var freeze_info: bool = false
-var info_cache: String = ""
+var reveal_mst  : bool = false            # mostrar AEM tras verificar
+var freeze_info : bool = false
+var info_cache  : String = ""
 
 # ---------- UI opcional (si existen en la escena) ----------
 @onready var new_btn   : Button = get_node_or_null("NewButton")
@@ -59,7 +69,7 @@ func _create_algo_popup() -> void:
 	algo_popup = PopupPanel.new()
 	algo_popup.name = "AlgoPopup"
 	algo_popup.size = Vector2(360, 160)
-	algo_popup.exclusive = true  # bloquea input al resto de la UI mientras esté abierto
+	algo_popup.exclusive = true
 	add_child(algo_popup)
 
 	var vb := VBoxContainer.new()
@@ -107,7 +117,6 @@ func _create_algo_popup() -> void:
 
 # ---------- Input ----------
 func _gui_input(event: InputEvent) -> void:
-	# Si el popup está visible, ignoramos input del lienzo
 	if algo_popup and algo_popup.visible:
 		return
 
@@ -122,66 +131,118 @@ func _gui_input(event: InputEvent) -> void:
 			KEY_R: _clear_selection()
 			KEY_N: algo_popup.popup_centered()
 
-# ---------- Generación de grafo ----------
+# ---------- Generación del grafo usando Grafo/Nodo ----------
 func _new_graph() -> void:
-	# distribuir nodos dentro del tamaño real del Control
-	nodes.clear()
-	var rect: Vector2 = size
+	# reset
+	nodes_pos.clear()
+	edges.clear()
+	mst_indices = PackedInt32Array()
+	mst_cost = 0
+	reveal_mst = false
+	freeze_info = false
+	info_cache = ""
+
+	# Reiniciar id estático para ids 0..N-1
+	Nodo.cid = 0
+
+	# 1) Crear N nodos
+	g = Grafo.new()
+	nodos = []
 	for i in NODE_COUNT:
-		var pos := Vector2(
+		var nd := Nodo.new(str(i))
+		g.agregar_nodo(nd)
+		nodos.append(nd)
+
+	# 2) Posiciones en pantalla
+	var rect: Vector2 = size
+	if rect == Vector2.ZERO:
+		rect = get_viewport().get_visible_rect().size
+	for i in NODE_COUNT:
+		nodes_pos.append(Vector2(
 			randf_range(MARGIN, maxf(MARGIN + 1.0, rect.x - MARGIN)),
 			randf_range(MARGIN, maxf(MARGIN + 1.0, rect.y - MARGIN))
-		)
-		nodes.append(pos)
+		))
 
-	# árbol aleatorio para garantizar conectividad
-	edges.clear()
-	var order: Array[int] = []
+	# 3) Mapeo Nodo.id -> índice compacto
+	id2idx.clear()
 	for i in NODE_COUNT:
-		order.append(i)
+		id2idx[nodos[i].id] = i
+
+	# 4) Conexiones: arbol aleatorio (para conectividad)
+	var order: Array[int] = []
+	for i in NODE_COUNT: order.append(i)
 	order.shuffle()
 	for i in range(1, NODE_COUNT):
-		var u: int = order[i - 1]
-		var v: int = order[i]
-		_add_edge_unique(u, v)
+		var u := nodos[order[i-1]]
+		var v := nodos[order[i]]
+		_connect_unique(u, v, false)
 
-	# aristas extra aleatorias
-	var tries: int = 0
-	while edges.size() < (NODE_COUNT - 1 + EXTRA_EDGES) and tries < 200:
+	# 5) Aristas extra aleatorias
+	var tries := 0
+	while _edge_count_undirected() < (NODE_COUNT - 1 + EXTRA_EDGES) and tries < 200:
 		tries += 1
-		var a: int = randi() % NODE_COUNT
-		var b: int = randi() % NODE_COUNT
+		var a := randi() % NODE_COUNT
+		var b := randi() % NODE_COUNT
 		if a == b: continue
-		_add_edge_unique(a, b, true)
+		_connect_unique(nodos[a], nodos[b], true)
 
-	# calcula AEM con el algoritmo elegido
+	# 6) Derivar arreglo de aristas **sin duplicados** desde el Grafo
+	_build_edges_from_grafo()
+
+	# 7) Calcular AEM
 	_compute_mst()
 
-	# Reset TOTAL del estado de selección (nada marcado) y ocultar solución
-	for e in edges:
-		e.selected = false
-	reveal_mst = false
-
-	# HUD: incluye explicación breve del algoritmo
-	freeze_info = false
+	# HUD
 	if info_lbl:
 		info_lbl.text = "{0}\n{1}".format([_hud_text(), _algo_brief()])
 	queue_redraw()
 
-func _edge_weight(a:int, b:int, noisy:bool=false) -> int:
-	var d := nodes[a].distance_to(nodes[b])
+# Calcula un peso por distancia entre posiciones (con ruido opcional)
+func _edge_weight_idx(i:int, j:int, noisy:bool=false) -> int:
+	var d := nodes_pos[i].distance_to(nodes_pos[j])
 	if noisy:
 		d *= randf_range(0.8, 1.25)
 	return int(round(d / 10.0)) + 1
 
-func _add_edge_unique(a:int, b:int, noisy:bool=false) -> void:
-	if a > b:
-		var t := a; a = b; b = t
-	for e in edges:
-		if e.a == a and e.b == b:
-			return
-	var w := _edge_weight(a, b, noisy)
-	edges.append(Edge.new(a, b, w))
+# Conecta en el Grafo si no existe, asignando peso por distancia
+func _connect_unique(n1:Nodo, n2:Nodo, noisy:bool) -> void:
+	if not n1.adyacente.has(n2) and not n2.adyacente.has(n1):
+		var i:int = int(id2idx[n1.id])
+		var j:int = int(id2idx[n2.id])
+		var w := _edge_weight_idx(i, j, noisy)
+		g.conectar_nodo(n1, n2, w)
+
+# Cuenta pares no dirigidos del Grafo
+func _edge_count_undirected() -> int:
+	var seen: Dictionary = {}
+	var cnt := 0
+	for u: Nodo in nodos:
+		for v in u.adyacente.keys():
+			var iu:int = int(id2idx[u.id])
+			var iv:int = int(id2idx[v.id])
+			var a:int = (iu if iu < iv else iv)
+			var b:int = (iv if iu < iv else iu)
+			var key := str(a, ":", b)
+			if not seen.has(key):
+				seen[key] = true
+				cnt += 1
+	return cnt
+
+# Toma las conexiones del Grafo y construye edges[] (solo a<b para evitar duplicados)
+func _build_edges_from_grafo() -> void:
+	edges.clear()
+	var seen: Dictionary = {}
+	for u: Nodo in nodos:
+		for v in u.adyacente.keys():
+			var iu:int = int(id2idx[u.id])
+			var iv:int = int(id2idx[v.id])
+			var a:int = (iu if iu < iv else iv)
+			var b:int = (iv if iu < iv else iu)
+			var key := str(a, ":", b)
+			if seen.has(key): continue
+			seen[key] = true
+			var w:int = int(round(u.adyacente[v]))
+			edges.append(Edge.new(a, b, w))
 
 # ---------- Selector de algoritmo ----------
 func _compute_mst() -> void:
@@ -302,7 +363,7 @@ func _pick_edge(p:Vector2) -> int:
 	var best_d := 1e9
 	for i in edges.size():
 		var e := edges[i]
-		var a := nodes[e.a]; var b := nodes[e.b]
+		var a := nodes_pos[e.a]; var b := nodes_pos[e.b]
 		var d := _point_segment_distance(p, a, b)
 		if d < EDGE_HIT_DIST and d < best_d:
 			best_d = d; best_idx = i
@@ -342,7 +403,6 @@ func _on_check() -> void:
 		"NOT_MIN":
 			detail = "Tu árbol no es mínimo. Tu costo: {0} | Óptimo: {1}".format([res.cost, mst_cost])
 
-	# revela la solución en el dibujo
 	reveal_mst = true
 	freeze_info = true
 	info_cache = "{0}\n{1}\n\n{2}\n{3}\n\n(Solución mostrada en naranja)".format(
@@ -418,14 +478,14 @@ func _draw() -> void:
 	# Aristas (fondo)
 	for i in edges.size():
 		var e := edges[i]
-		var a := nodes[e.a]; var b := nodes[e.b]
+		var a := nodes_pos[e.a]; var b := nodes_pos[e.b]
 		draw_line(a, b, Color(0.75,0.75,0.8), EDGE_THICKNESS)
 
 	# Aristas seleccionadas (encima, verde)
 	for i in edges.size():
 		var e := edges[i]
 		if not e.selected: continue
-		var a := nodes[e.a]; var b := nodes[e.b]
+		var a := nodes_pos[e.a]; var b := nodes_pos[e.b]
 		draw_line(a, b, Color(0.2,0.8,0.4), EDGE_THICKNESS + 2.0)
 
 	# AEM revelado tras verificar (ámbar), sin duplicar las ya seleccionadas
@@ -433,12 +493,12 @@ func _draw() -> void:
 		for i in mst_indices:
 			var e := edges[i]
 			if e.selected: continue
-			var a := nodes[e.a]; var b := nodes[e.b]
+			var a := nodes_pos[e.a]; var b := nodes_pos[e.b]
 			draw_line(a, b, Color(1.0, 0.65, 0.0, 0.95), EDGE_THICKNESS + 1.0)
 
 	# Pesos
 	for e in edges:
-		var mid := (nodes[e.a] + nodes[e.b]) * 0.5
+		var mid := (nodes_pos[e.a] + nodes_pos[e.b]) * 0.5
 		var bg := Color(0,0,0,0.6)
 		var fg := Color(1,1,1)
 		var text := str(e.w)
@@ -450,14 +510,14 @@ func _draw() -> void:
 		draw_string(font, r.position + Vector2(4, ts.y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, fg)
 
 	# Nodos
-	for i in nodes.size():
-		draw_circle(nodes[i], NODE_RADIUS, Color(0.15,0.2,0.28))
-		draw_circle(nodes[i], NODE_RADIUS-3.0, Color(0.9,0.95,1.0))
+	for i in nodes_pos.size():
+		draw_circle(nodes_pos[i], NODE_RADIUS, Color(0.15,0.2,0.28))
+		draw_circle(nodes_pos[i], NODE_RADIUS-3.0, Color(0.9,0.95,1.0))
 		var label_text := str(i)
 		var f := get_theme_default_font()
 		var s := 18
 		var tsize := f.get_string_size(label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, s)
-		draw_string(f, nodes[i] - tsize*0.5 + Vector2(0, tsize.y*0.35), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, s, Color.BLACK)
+		draw_string(f, nodes_pos[i] - tsize*0.5 + Vector2(0, tsize.y*0.35), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, s, Color.BLACK)
 
 func _process(_dt: float) -> void:
 	if not info_lbl:

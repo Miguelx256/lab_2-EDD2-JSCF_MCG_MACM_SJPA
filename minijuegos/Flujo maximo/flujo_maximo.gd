@@ -1,20 +1,31 @@
 extends Control
+# Flujo Máximo (Edmonds–Karp) usando clases externas Grafo/Nodo
+# Godot 4.5
+# Hijos requeridos del Control raíz:
+#   - NewButton   : Button
+#   - ClearButton : Button
+#   - CheckButton : Button
+#   - InfoLabel   : Label
 
 const NODE_COUNT      : int = 4
-const EXTRA_EDGES     : int = 2      
+const EXTRA_EDGES     : int = 2
 const NODE_RADIUS     : float = 16.0
 const EDGE_THICKNESS  : float = 3.0
 const NODE_HIT_DIST   : float = 18.0
 const MARGIN          : float = 64.0
 
-const SOURCE_COLOR        : Color = Color(0.10, 0.25, 0.90)  
-const SINK_COLOR          : Color = Color(0.20, 0.85, 0.40)  
+const SOURCE_COLOR        : Color = Color(0.10, 0.25, 0.90)  # azul oscuro
+const SINK_COLOR          : Color = Color(0.20, 0.85, 0.40)  # verde
 const NODE_BASE_INNER     : Color = Color(0.92, 0.96, 1.00)
 const NODE_BASE_BORDER    : Color = Color(0.15, 0.20, 0.28)
 
 const SUCCESS_MSG := "Flujo seguro establecido. El ataque ha sido contenido. NEMESIS ha sido aislado"
 
-# ---------- Estructuras ----------
+# ==== Referencias a tus clases externas ====
+const Grafo = preload("res://core/Grafo.gd")
+const Nodo  = preload("res://core/Nodo.gd")
+
+# ---------- Estructuras internas ----------
 class Edge:
 	var u:int
 	var v:int
@@ -31,17 +42,21 @@ class REdge:
 	var forward:bool
 
 # ---------- Estado ----------
-var nodes: Array[Vector2] = []
+var g: Grafo
+var nodos: Array[Nodo] = []
+var id_compacto: Dictionary = {}      # Nodo.id -> índice 0..N-1
+
+var nodes_pos: Array[Vector2] = []
 var edges: Array[Edge] = []
 
-var s: int = -1    # fuente (primer click)
-var t: int = -1    # sumidero (segundo click)
+var s: int = -1
+var t: int = -1
 var max_flow: int = 0
 var reveal_flow: bool = false
 
 var freeze_info: bool = false
 var info_cache: String = ""
-var G: Array = []  # red residual: filas Array con REdge (sin tipos anidados)
+var G_res: Array = []                 # Array<Array<REdge>>
 
 # ---------- UI ----------
 @onready var new_btn   : Button = get_node_or_null("NewButton")
@@ -77,8 +92,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _pick_node(p: Vector2) -> int:
 	var best := -1
 	var bd := 1e9
-	for i in nodes.size():
-		var d := nodes[i].distance_to(p)
+	for i in nodes_pos.size():
+		var d := nodes_pos[i].distance_to(p)
 		if d < NODE_HIT_DIST and d < bd:
 			bd = d; best = i
 	return best
@@ -99,44 +114,81 @@ func _select_node(v:int) -> void:
 	reveal_flow = false
 	freeze_info = false
 
-# ---------- Grafo ----------
+# ---------- Construcción del grafo ----------
 func _new_graph() -> void:
-	nodes.clear()
-	edges.clear()
 	s = -1; t = -1; max_flow = 0
 	reveal_flow = false; freeze_info = false
+	nodes_pos.clear()
+	edges.clear()
+	id_compacto.clear()
+
+	Nodo.cid = 0  # asegurar ids 0..N-1
+
+	g = Grafo.new()
+	nodos = []
+	for i in NODE_COUNT:
+		var nd := Nodo.new(str(i))
+		g.agregar_nodo(nd)
+		nodos.append(nd)
 
 	var rect: Vector2 = get_viewport().get_visible_rect().size
 	for i in NODE_COUNT:
-		nodes.append(Vector2(
+		nodes_pos.append(Vector2(
 			randf_range(MARGIN, maxf(MARGIN + 1.0, rect.x - MARGIN)),
 			randf_range(MARGIN, maxf(MARGIN + 1.0, rect.y - MARGIN))
 		))
 
-	# Backbone 0->1->2->... para asegurar caminos
-	for i in range(1, NODE_COUNT):
-		_add_edge_unique(i - 1, i, _rand_cap())
+	for i in NODE_COUNT:
+		id_compacto[nodos[i].id] = i
 
-	# Aristas extra dirigidas
+	# 0-1-2-... (en tu Grafo es no dirigido; aquí derivaremos dirigidas)
+	for i in range(1, NODE_COUNT):
+		_connect_unique(nodos[i - 1], nodos[i], _rand_cap())
+
+	# aristas extra
 	var tries := 0
-	while edges.size() < (NODE_COUNT - 1 + EXTRA_EDGES) and tries < 100:
+	while _edge_count_undirected() < (NODE_COUNT - 1 + EXTRA_EDGES) and tries < 100:
 		tries += 1
-		var u := randi() % NODE_COUNT
-		var v := randi() % NODE_COUNT
-		if u == v: continue
-		_add_edge_unique(u, v, _rand_cap())
+		var a := randi() % NODE_COUNT
+		var b := randi() % NODE_COUNT
+		if a == b: continue
+		_connect_unique(nodos[a], nodos[b], _rand_cap())
+
+	_build_directed_edges_from_grafo()
 
 	_update_info()
 	queue_redraw()
 
+func _connect_unique(n1:Nodo, n2:Nodo, cap:int) -> void:
+	if not n1.adyacente.has(n2) and not n2.adyacente.has(n1):
+		g.conectar_nodo(n1, n2, cap)
+
+func _edge_count_undirected() -> int:
+	var seen: Dictionary = {}
+	var cnt: int = 0
+	for u: Nodo in nodos:
+		for v in u.adyacente.keys():
+			var uid: int = int(u.id)
+			var vid: int = int(v.id)
+			var a: int = (uid if uid < vid else vid)
+			var b: int = (vid if uid < vid else uid)
+			var key: String = str(a, ":", b)
+			if not seen.has(key):
+				seen[key] = true
+				cnt += 1
+	return cnt
+
 func _rand_cap() -> int:
 	return 5 + int(round(randf_range(0.0, 1.0) * 12.0)) # 5..17 aprox
 
-func _add_edge_unique(u:int, v:int, cap:int) -> void:
-	for e in edges:
-		if e.u == u and e.v == v:
-			return
-	edges.append(Edge.new(u, v, cap))
+func _build_directed_edges_from_grafo() -> void:
+	edges.clear()
+	for u in nodos:
+		var iu:int = int(id_compacto[u.id])
+		for v in u.adyacente.keys():
+			var iv:int = int(id_compacto[v.id])
+			var cap:int = int(round(u.adyacente[v]))
+			edges.append(Edge.new(iu, iv, cap))
 
 # ---------- Verificar ----------
 func _on_check() -> void:
@@ -144,16 +196,13 @@ func _on_check() -> void:
 		_flash_info("Selecciona primero la FUENTE (azul oscuro) y luego el SUMIDERO (verde).")
 		return
 
-	# 1) Máximo global entre cualquier par (sin alterar dibujo)
 	var best_flow := _global_max_flow_value()
 
-	# 2) Flujo del par elegido y lo dejamos visible
 	_reset_flows()
 	max_flow = _edmonds_karp(s, t)
 	reveal_flow = true
 
 	var is_optimal := (max_flow == best_flow)
-
 	var header := "{0}\n{1}".format([_hud_text(), _algo_brief()])
 	var detail := "Flujo máximo con (S={0}, T={1}): {2}".format([s, t, max_flow])
 	var compare := "Máximo global posible: {0}".format([best_flow])
@@ -164,9 +213,8 @@ func _on_check() -> void:
 	freeze_info = true
 	queue_redraw()
 
-# ---------- Utilidades de verificación ----------
+# ---------- Utilidades verificación ----------
 func _global_max_flow_value() -> int:
-	# Guarda flujos actuales
 	var backup: Array[int] = []
 	backup.resize(edges.size())
 	for i in edges.size():
@@ -181,7 +229,6 @@ func _global_max_flow_value() -> int:
 			if f > best:
 				best = f
 
-	# Restaura flujos
 	for i in edges.size():
 		edges[i].flow = backup[i]
 	return best
@@ -200,10 +247,10 @@ func _reset_flows() -> void:
 		e.flow = 0
 
 func _build_residual() -> void:
-	G.clear()
-	G.resize(NODE_COUNT)
+	G_res.clear()
+	G_res.resize(NODE_COUNT)
 	for i in NODE_COUNT:
-		G[i] = []
+		G_res[i] = []
 
 	for i in edges.size():
 		var e := edges[i]
@@ -211,18 +258,18 @@ func _build_residual() -> void:
 		var a := REdge.new()
 		a.to = e.v
 		a.cap = e.cap - e.flow
-		a.rev = (G[e.v] as Array).size()
+		a.rev = (G_res[e.v] as Array).size()
 		a.draw_idx = i
 		a.forward = true
-		(G[e.u] as Array).append(a)
+		(G_res[e.u] as Array).append(a)
 		# backward
 		var b := REdge.new()
 		b.to = e.u
 		b.cap = e.flow
-		b.rev = (G[e.u] as Array).size() - 1
+		b.rev = (G_res[e.u] as Array).size() - 1
 		b.draw_idx = i
 		b.forward = false
-		(G[e.v] as Array).append(b)
+		(G_res[e.v] as Array).append(b)
 
 func _edmonds_karp(src:int, sink:int) -> int:
 	var flow := 0
@@ -243,7 +290,7 @@ func _edmonds_karp(src:int, sink:int) -> int:
 
 		while q.size() > 0 and parent_v[sink] == -1:
 			var u:int = int(q.pop_front())
-			var row := G[u] as Array
+			var row := G_res[u] as Array
 			for ei in row.size():
 				var re := row[ei] as REdge
 				if re.cap > 0 and parent_v[re.to] == -1:
@@ -254,24 +301,22 @@ func _edmonds_karp(src:int, sink:int) -> int:
 						break
 
 		if parent_v[sink] == -1:
-			break  # no hay más aumentantes
+			break
 
-		# capacidad de aumento
 		var aug := 1_000_000_000
 		var v := sink
 		while v != src:
 			var u2:int = parent_v[v]
-			var re2 := (G[u2] as Array)[parent_e[v]] as REdge
+			var re2 := (G_res[u2] as Array)[parent_e[v]] as REdge
 			aug = min(aug, re2.cap)
 			v = u2
 
-		# aplicar aumento y reflejar en aristas reales
 		v = sink
 		while v != src:
 			var u3:int = parent_v[v]
-			var re3 := (G[u3] as Array)[parent_e[v]] as REdge
+			var re3 := (G_res[u3] as Array)[parent_e[v]] as REdge
 			re3.cap -= aug
-			var rev := (G[v] as Array)[re3.rev] as REdge
+			var rev := (G_res[v] as Array)[re3.rev] as REdge
 			rev.cap += aug
 
 			var idx := re3.draw_idx
@@ -285,63 +330,87 @@ func _edmonds_karp(src:int, sink:int) -> int:
 
 	return flow
 
-# ---------- Dibujo ----------
+# ---------- Helpers para etiquetas únicas ----------
+func _min_i(a:int, b:int) -> int:
+	return a if a < b else b
+
+func _max_i(a:int, b:int) -> int:
+	return a if a > b else b
+
+# Devuelve, para cada pareja no dirigida (a:b con a<b), un índice de arista representante.
+func _representative_edges() -> Dictionary:
+	var rep: Dictionary = {}
+	for i in edges.size():
+		var e := edges[i]
+		var a:int = _min_i(e.u, e.v)
+		var b:int = _max_i(e.u, e.v)
+		var k:String = str(a, ":", b)
+		if not rep.has(k):
+			rep[k] = i
+	return rep
+
 func _has_edge(u:int, v:int) -> bool:
 	for ed in edges:
 		if ed.u == u and ed.v == v:
 			return true
 	return false
 
+# ---------- Dibujo ----------
 func _draw() -> void:
 	# Aristas base
 	for i in edges.size():
 		var e := edges[i]
-		_draw_arrow(nodes[e.u], nodes[e.v], Color(0.75,0.75,0.9,0.85), EDGE_THICKNESS)
+		_draw_arrow(nodes_pos[e.u], nodes_pos[e.v], Color(0.75,0.75,0.9,0.85), EDGE_THICKNESS)
 
 	# Aristas con flujo > 0 (tras verificar)
 	if reveal_flow:
 		for i in edges.size():
 			var e2 := edges[i]
 			if e2.flow <= 0: continue
-			_draw_arrow(nodes[e2.u], nodes[e2.v], Color(0.2,0.7,1.0,0.95), EDGE_THICKNESS + 1.5)
+			_draw_arrow(nodes_pos[e2.u], nodes_pos[e2.v], Color(0.2,0.7,1.0,0.95), EDGE_THICKNESS + 1.5)
 
-	# Etiquetas flujo/capacidad (separadas si hay arista inversa)
-	for e in edges:
-		var a := nodes[e.u]
-		var b := nodes[e.v]
-		var mid := (a + b) * 0.5
+	# === Etiquetas sin superposición: UN rótulo por pareja (a<b) ===
+	var reps := _representative_edges()
+	for k in reps.keys():
+		var idx:int = reps[k]
+		var e := edges[idx]
 
-		var offset := Vector2.ZERO
-		if _has_edge(e.v, e.u):
-			var dir := b - a
-			if dir.length() > 0.0:
-				var n := Vector2(-dir.y, dir.x).normalized()
-				offset = n * 10.0 if e.u < e.v else -n * 10.0
-		mid += offset
+		var a_pos := nodes_pos[e.u]
+		var b_pos := nodes_pos[e.v]
+		var mid := (a_pos + b_pos) * 0.5
 
+		# pequeño desvío perpendicular para despegar el rótulo de la línea
+		var dir := b_pos - a_pos
+		var len := dir.length()
+		if len > 0.0:
+			var u := dir / len
+			var n := Vector2(-u.y, u.x)
+			mid += n * 12.0
+
+		# mostramos flujo/capacidad del representante (flujo no negativo)
 		var text := "{0}/{1}".format([max(e.flow, 0), e.cap])
+
 		var font := get_theme_default_font()
 		var size := 16
 		var ts := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size)
 		var r := Rect2(mid - ts * 0.5 - Vector2(4, 2), ts + Vector2(8, 6))
-
 		draw_rect(r, Color(0, 0, 0, 0.6), true, 6.0)
 		draw_string(font, r.position + Vector2(4, ts.y),
 			text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(1,1,1))
 
 	# Nodos (S=azul, T=verde)
-	for i in nodes.size():
+	for i in nodes_pos.size():
 		var inner := NODE_BASE_INNER
 		if i == s: inner = SOURCE_COLOR
 		elif i == t: inner = SINK_COLOR
-		draw_circle(nodes[i], NODE_RADIUS, NODE_BASE_BORDER)
-		draw_circle(nodes[i], NODE_RADIUS - 3.0, inner)
+		draw_circle(nodes_pos[i], NODE_RADIUS, NODE_BASE_BORDER)
+		draw_circle(nodes_pos[i], NODE_RADIUS - 3.0, inner)
 
 		var lbl := str(i)
 		var f := get_theme_default_font()
 		var sz := 18
 		var tsize := f.get_string_size(lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, sz)
-		draw_string(f, nodes[i] - tsize*0.5 + Vector2(0, tsize.y*0.35), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, sz, Color.BLACK)
+		draw_string(f, nodes_pos[i] - tsize*0.5 + Vector2(0, tsize.y*0.35), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, sz, Color.BLACK)
 
 func _draw_arrow(a:Vector2, b:Vector2, col:Color, width:float) -> void:
 	var dir := b - a
