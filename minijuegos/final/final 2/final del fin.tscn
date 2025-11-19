@@ -1,0 +1,55 @@
+[gd_scene load_steps=3 format=3 uid="uid://1ttq2vovu4su"]
+
+[ext_resource type="Script" uid="uid://dgveku5h2wxf0" path="res://minijuegos/final/final 2/final_del_fin.gd" id="1_2s3e8"]
+[ext_resource type="Script" uid="uid://ryl5scrray2e" path="res://minijuegos/final/final 2/node_2d.gd" id="2_q5w2k"]
+
+[node name="FinalDelFin" type="Node2D"]
+script = ExtResource("1_2s3e8")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="generar grafo" type="Button" parent="CanvasLayer"]
+anchors_preset = -1
+anchor_left = -0.040000003
+anchor_top = -0.043
+anchor_right = -0.040000003
+anchor_bottom = -0.043
+offset_left = 149.08
+offset_top = 508.864
+offset_right = 315.08002
+offset_bottom = 612.864
+text = "generar grafo "
+
+[node name="verificar" type="Button" parent="CanvasLayer"]
+offset_left = 412.0
+offset_top = 481.0
+offset_right = 603.0
+offset_bottom = 578.0
+text = "verificar"
+
+[node name="siguiente" type="Button" parent="CanvasLayer"]
+anchors_preset = -1
+anchor_left = -0.096
+anchor_top = -0.063
+anchor_right = -0.096
+anchor_bottom = -0.063
+offset_left = 1035.592
+offset_top = 517.824
+offset_right = 1217.592
+offset_bottom = 627.824
+text = "siguiente"
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 1138.0
+offset_bottom = 65.0
+text = "texto de ejemplo
+"
+
+[node name="Node2D" type="Node2D" parent="CanvasLayer"]
+script = ExtResource("2_q5w2k")
+
+[connection signal="button_down" from="CanvasLayer/generar grafo" to="." method="_on_generar_grafo_button_down"]
+[connection signal="button_down" from="CanvasLayer/verificar" to="." method="_on_verificar_button_down"]
+[connection signal="button_down" from="CanvasLayer/siguiente" to="." method="_on_siguiente_button_down"]

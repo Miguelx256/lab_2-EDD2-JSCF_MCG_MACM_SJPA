@@ -162,8 +162,8 @@ func generar_aleatorio(num_nodos: int, max_aristas_extra: int = 5) -> void:
 	# 1️⃣ Generar posiciones aleatorias de nodos
 	for i in range(num_nodos):
 		var pos = Vector2(
-			randi() % (get_viewport_rect().size.x - 100) + 50,
-			randi() % (get_viewport_rect().size.y - 100) + 50
+			randi() % int(get_viewport_rect().size.x - 100) + 50,
+			randi() % int(get_viewport_rect().size.y - 100) + 50
 		)
 		nodos.append(pos)
 	
