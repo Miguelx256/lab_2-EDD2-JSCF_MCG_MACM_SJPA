@@ -1,0 +1,58 @@
+[gd_scene load_steps=8 format=3 uid="uid://cnk5sk6p3yy7j"]
+
+[ext_resource type="Script" uid="uid://daagvgd7uucic" path="res://minijuegos/final/final.gd" id="1_mnnmm"]
+[ext_resource type="Script" uid="uid://bih3gqppm7h7f" path="res://minijuegos/final/node_2d.gd" id="2_8uxca"]
+[ext_resource type="Script" uid="uid://ck63qoqfb16c" path="res://minijuegos/final/canvas_layer.gd" id="2_hshxt"]
+[ext_resource type="Script" uid="uid://csr20j426hhd1" path="res://minijuegos/final/gene_grafo.gd" id="3_hshxt"]
+[ext_resource type="Script" uid="uid://ime6g7qoudue" path="res://minijuegos/final/verificar.gd" id="4_dxrlh"]
+[ext_resource type="Script" uid="uid://bfqry1i8lvear" path="res://minijuegos/final/label.gd" id="5_0wn45"]
+[ext_resource type="Script" uid="uid://d05fl8i80grbt" path="res://minijuegos/final/siguiente.gd" id="5_3h0xe"]
+
+[node name="Final" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = 1.0
+offset_right = -1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mnnmm")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+script = ExtResource("2_hshxt")
+
+[node name="generador" type="Button" parent="CanvasLayer"]
+offset_left = 64.0
+offset_top = 512.0
+offset_right = 296.0
+offset_bottom = 608.0
+text = "generador de grafo"
+script = ExtResource("3_hshxt")
+
+[node name="verificar" type="Button" parent="CanvasLayer"]
+offset_left = 344.0
+offset_top = 512.0
+offset_right = 576.0
+offset_bottom = 608.0
+text = "verificar "
+script = ExtResource("4_dxrlh")
+
+[node name="siguiente" type="Button" parent="CanvasLayer"]
+offset_left = 624.0
+offset_top = 512.0
+offset_right = 856.0
+offset_bottom = 608.0
+text = "siguiente"
+script = ExtResource("5_3h0xe")
+
+[node name="Labeltarea" type="Label" parent="CanvasLayer"]
+offset_right = 1153.0
+offset_bottom = 76.0
+text = "texto de ejemplo"
+script = ExtResource("5_0wn45")
+
+[node name="Node2D" type="Node2D" parent="CanvasLayer"]
+script = ExtResource("2_8uxca")
