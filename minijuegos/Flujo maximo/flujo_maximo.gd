@@ -480,7 +480,7 @@ func _process(_dt: float) -> void:
 
 
 func _on_clear_button_2_button_down() -> void:
-	pass # Replace with function body.
+	get_tree().change_scene_to_file("res://minijuegos/final/final 2/final del fin.tscn")
 
 
 func _on_next_lvl_button_down() -> void:

@@ -11,5 +11,6 @@ config_version=5
 [application]
 
 config/name="lab2 edd2"
+run/main_scene="uid://2066tby8xgh4"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"

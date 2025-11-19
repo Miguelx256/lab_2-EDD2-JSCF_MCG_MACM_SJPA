@@ -45,36 +45,43 @@ func _on_verificar_button_down() -> void:
 # GENERAR GRAFO CONEXO DE 5 NODOS
 # -------------------------------------------------------------------
 func generar_grafo_conexo_aleatorio() -> void:
+	# Reiniciar grafo (lista de nodos)
 	grafo.lista_adyacencia.clear()
-	grafo.matriz_adyacencia.clear()
-	Nodo.cid = 0
+	# Si tenías matriz_adyacencia y ya no la usas, simplemente NO la toques
+	# grafo.matriz_adyacencia.clear()  # ❌ eliminar esta línea si ya no existe
 
 	var total: int = 5
-	var nodos_creados: Array = []
+	var nodos_creados: Array[Nodo] = []
 
+	# 1) Crear nodos y agregarlos al grafo
 	for i in range(total):
 		var n: Nodo = Nodo.new("N" + str(i))
+		n.id = i  # ✅ id numérico 0..total-1 si lo necesitas en otros lados
 		grafo.agregar_nodo(n)
 		nodos_creados.append(n)
 
-	var conectados: Array = [nodos_creados.pop_back()]
+	# 2) Construir un árbol aleatorio (para asegurar conectividad)
+	var conectados: Array[Nodo] = [nodos_creados.pop_back()]
 
 	while nodos_creados.size() > 0:
-		var nuevo = nodos_creados.pop_back()
-		var existente = conectados[randi() % conectados.size()]
-		var peso: float = float(randi() % 99 + 1)
+		var nuevo: Nodo = nodos_creados.pop_back()
+		var existente: Nodo = conectados[randi() % conectados.size()]
+		var peso: float = randf_range(1.0, 100.0)
 		grafo.conectar_nodo(existente, nuevo, peso)
 		conectados.append(nuevo)
 
+	# 3) Aristas extra aleatorias
 	var extras: int = randi() % 3
 	for i in range(extras):
-		var a = grafo.lista_adyacencia[randi() % total]
-		var b = grafo.lista_adyacencia[randi() % total]
-		if a == b: continue
-		if b in a.adyacente: continue
-		var peso2: float = float(randi() % 99 + 1)
+		var a: Nodo = grafo.lista_adyacencia[randi() % grafo.lista_adyacencia.size()]
+		var b: Nodo = grafo.lista_adyacencia[randi() % grafo.lista_adyacencia.size()]
+		if a == b:
+			continue
+		# evitar duplicados
+		if a.adyacente.has(b) or b.adyacente.has(a):
+			continue
+		var peso2: float = randf_range(1.0, 100.0)
 		grafo.conectar_nodo(a, b, peso2)
-
 
 # -------------------------------------------------------------------
 # MOSTRAR GRAFO EN PANTALLA
