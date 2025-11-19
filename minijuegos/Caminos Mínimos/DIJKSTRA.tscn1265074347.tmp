@@ -12,9 +12,8 @@ script = ExtResource("1_pxyci")
 
 [node name="BG" type="CanvasLayer" parent="."]
 
-[node name="Dijkstra" type="TextureRect" parent="BG"]
-offset_right = 1152.0
-offset_bottom = 648.0
+[node name="Dijkstra" type="Sprite2D" parent="BG"]
+position = Vector2(576, 322)
 texture = ExtResource("2_jxg6e")
 
 [node name="NewButton" type="Button" parent="."]

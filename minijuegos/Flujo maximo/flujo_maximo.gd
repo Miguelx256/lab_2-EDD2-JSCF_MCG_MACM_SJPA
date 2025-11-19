@@ -19,7 +19,8 @@ const SINK_COLOR          : Color = Color(0.20, 0.85, 0.40)  # verde
 const NODE_BASE_INNER     : Color = Color(0.92, 0.96, 1.00)
 const NODE_BASE_BORDER    : Color = Color(0.15, 0.20, 0.28)
 @onready var next_lvl: Button = $NextLVL
-
+@onready var bg: CanvasLayer = $BG
+@onready var flujo: TextureRect = $BG/Flujo
 
 const SUCCESS_MSG := "Flujo seguro establecido. El ataque ha sido contenido. NEMESIS ha sido aislado"
 
@@ -67,6 +68,10 @@ var G_res: Array = []                 # Array<Array<REdge>>
 @onready var info_lbl  : Label  = get_node_or_null("InfoLabel")
 
 func _ready() -> void:
+	bg.layer = -100
+	flujo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flujo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	flujo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	randomize()
 	next_lvl.hide()
 	set_anchors_preset(Control.PRESET_FULL_RECT)

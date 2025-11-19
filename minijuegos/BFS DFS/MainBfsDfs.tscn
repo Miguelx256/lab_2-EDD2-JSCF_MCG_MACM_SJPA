@@ -1,9 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://2066tby8xgh4"]
+[gd_scene load_steps=3 format=3 uid="uid://2066tby8xgh4"]
 
 [ext_resource type="Script" uid="uid://uqfuccewecvf" path="res://minijuegos/BFS DFS/main_bfs_dfs.gd" id="1_yqpqw"]
+[ext_resource type="Texture2D" uid="uid://lyfx13y20fsl" path="res://recursos/bfs dfs.png" id="2_gqhde"]
 
 [node name="MainBfsDfs" type="Node2D"]
 script = ExtResource("1_yqpqw")
+
+[node name="BG" type="CanvasLayer" parent="."]
+
+[node name="BfsDfs" type="TextureRect" parent="BG"]
+offset_right = 1152.0
+offset_bottom = 648.0
+texture = ExtResource("2_gqhde")
 
 [node name="graph" type="Node2D" parent="."]
 

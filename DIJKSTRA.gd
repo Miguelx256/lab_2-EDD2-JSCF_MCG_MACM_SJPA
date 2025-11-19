@@ -35,11 +35,15 @@ var goal_node:int = -1
 @onready var check_btn :Button = $CheckButton
 @onready var info_lbl  :Label  = $InfoLabel
 @onready var next_lvl  :Button = $NextLvl
-
+@onready var bg: CanvasLayer = $BG
+@onready var dijkstra_fondo: TextureRect = $BG/Dijkstra
 
 func _ready():
+	bg.layer = -100  # dibuja detrás de todo
+	dijkstra_fondo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dijkstra_fondo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	dijkstra_fondo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	randomize()
-
 	next_lvl.hide()
 	new_btn.pressed.connect(_crear_grafo)
 	clear_btn.pressed.connect(_clear)

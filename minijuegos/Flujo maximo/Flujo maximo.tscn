@@ -1,11 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://et5bp527w38s"]
+[gd_scene load_steps=3 format=3 uid="uid://et5bp527w38s"]
 
 [ext_resource type="Script" uid="uid://cydb7obiv0ls" path="res://minijuegos/Flujo maximo/flujo_maximo.gd" id="1_uhwsw"]
+[ext_resource type="Texture2D" uid="uid://kgauhag0b56i" path="res://recursos/flujo.png" id="2_ohdhm"]
 
 [node name="FlujoMaximo" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_uhwsw")
+
+[node name="BG" type="CanvasLayer" parent="."]
+
+[node name="Flujo" type="TextureRect" parent="BG"]
+offset_right = 1152.0
+offset_bottom = 648.0
+texture = ExtResource("2_ohdhm")
 
 [node name="NewButton" type="Button" parent="."]
 layout_mode = 0

@@ -3,6 +3,9 @@ extends Node2D
 @onready var grafo_visual: Node2D = $CanvasLayer/Node2D
 @onready var Grafo = preload("res://core/Grafo.gd")
 @onready var Nodo = preload("res://core/Nodo.gd")
+@onready var final: TextureRect = $CanvasLayer/Final
+@onready var canvas_layer: CanvasLayer = $CanvasLayer
+
 #prueba
 var grafo
 var etapa_mision_final: int = 1
@@ -10,6 +13,10 @@ var pantalla_ancho: int = 1152
 var pantalla_alto: int = 648
 
 func _ready() -> void:
+	canvas_layer.layer = -100  # dibuja detrás de todo
+	final.set_anchors_preset(Control.PRESET_FULL_RECT)
+	final.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	final.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	randomize()
 	grafo = Grafo.new()
 

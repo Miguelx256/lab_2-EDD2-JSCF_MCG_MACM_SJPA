@@ -18,10 +18,14 @@ var visitados = []
 var nodo_infectado = null   # nodo visual
 var graph_node: Node2D
 @onready var next_lvl: Button = $NextLvl
-
-
+@onready var bg: CanvasLayer = $BG
+@onready var bfs_dfs: TextureRect = $BG/BfsDfs
 
 func _ready():
+	bg.layer = -100  # dibuja detrás de todo
+	bfs_dfs.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bfs_dfs.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bfs_dfs.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	randomize()
 	next_lvl.hide()
 

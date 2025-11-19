@@ -45,7 +45,8 @@ var info_cache  : String = ""
 @onready var clear_btn : Button = get_node_or_null("ClearButton")
 @onready var info_lbl  : Label  = get_node_or_null("InfoLabel")
 @onready var next_lvl: Button = $NextLVL
-
+@onready var bg_layer: CanvasLayer = $BG
+@onready var arbol: TextureRect = $BG/Arbol
 
 # Popup de selección de algoritmo (creado por código)
 var algo_popup: PopupPanel
@@ -53,6 +54,10 @@ var prim_btn: Button
 var kruskal_btn: Button
 
 func _ready() -> void:
+	bg_layer.layer = -100
+	arbol.set_anchors_preset(Control.PRESET_FULL_RECT)
+	arbol.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	arbol.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	randomize()
 	next_lvl.hide()
 	_connect_buttons()

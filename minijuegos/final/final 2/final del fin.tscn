@@ -1,12 +1,18 @@
-[gd_scene load_steps=3 format=3 uid="uid://1ttq2vovu4su"]
+[gd_scene load_steps=4 format=3 uid="uid://1ttq2vovu4su"]
 
 [ext_resource type="Script" uid="uid://dgveku5h2wxf0" path="res://minijuegos/final/final 2/final_del_fin.gd" id="1_2s3e8"]
 [ext_resource type="Script" uid="uid://ryl5scrray2e" path="res://minijuegos/final/final 2/node_2d.gd" id="2_q5w2k"]
+[ext_resource type="Texture2D" uid="uid://c8ovv66plvfso" path="res://recursos/final.png" id="3_muenc"]
 
 [node name="FinalDelFin" type="Node2D"]
 script = ExtResource("1_2s3e8")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Final" type="TextureRect" parent="CanvasLayer"]
+offset_right = 1152.0
+offset_bottom = 648.0
+texture = ExtResource("3_muenc")
 
 [node name="generar grafo" type="Button" parent="CanvasLayer"]
 anchors_preset = -1

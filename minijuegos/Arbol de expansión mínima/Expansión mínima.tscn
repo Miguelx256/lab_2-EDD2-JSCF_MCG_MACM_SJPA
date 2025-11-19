@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bpwmumtklv5pu"]
+[gd_scene load_steps=3 format=3 uid="uid://bpwmumtklv5pu"]
 
 [ext_resource type="Script" uid="uid://dyoru4c5pipjr" path="res://minijuegos/Arbol de expansión mínima/expansión_mínima.gd" id="1_ld67p"]
+[ext_resource type="Texture2D" uid="uid://c2iqo6g8yr6pn" path="res://recursos/arbol.png" id="2_7a0qm"]
 
 [node name="ExpansiónMínima" type="Control"]
 layout_mode = 3
@@ -10,6 +11,13 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ld67p")
+
+[node name="BG" type="CanvasLayer" parent="."]
+
+[node name="Arbol" type="TextureRect" parent="BG"]
+offset_top = 1.0
+offset_bottom = 1.0
+texture = ExtResource("2_7a0qm")
 
 [node name="NewButton" type="Button" parent="."]
 layout_mode = 0
