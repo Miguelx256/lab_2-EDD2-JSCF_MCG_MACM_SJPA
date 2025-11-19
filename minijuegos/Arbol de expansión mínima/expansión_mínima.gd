@@ -145,14 +145,15 @@ func _new_graph() -> void:
 	freeze_info = false
 	info_cache = ""
 
-	# Reiniciar id estático para ids 0..N-1
-	Nodo.cid = 0
+	# ❌ Ya NO usamos Nodo.cid
+	# Nodo.cid = 0   <-- elimina esta línea
 
 	# 1) Crear N nodos
 	g = Grafo.new()
 	nodos = []
 	for i in NODE_COUNT:
 		var nd := Nodo.new(str(i))
+		nd.id = i                    # ✅ asignamos id explícitamente 0..N-1
 		g.agregar_nodo(nd)
 		nodos.append(nd)
 
@@ -169,11 +170,12 @@ func _new_graph() -> void:
 	# 3) Mapeo Nodo.id -> índice compacto
 	id2idx.clear()
 	for i in NODE_COUNT:
-		id2idx[nodos[i].id] = i
+		id2idx[nodos[i].id] = i      # ids 0..N-1, todo cuadra
 
-	# 4) Conexiones: arbol aleatorio (para conectividad)
+	# 4) Conexiones: árbol aleatorio (para conectividad)
 	var order: Array[int] = []
-	for i in NODE_COUNT: order.append(i)
+	for i in NODE_COUNT:
+		order.append(i)
 	order.shuffle()
 	for i in range(1, NODE_COUNT):
 		var u := nodos[order[i-1]]
@@ -186,7 +188,8 @@ func _new_graph() -> void:
 		tries += 1
 		var a := randi() % NODE_COUNT
 		var b := randi() % NODE_COUNT
-		if a == b: continue
+		if a == b:
+			continue
 		_connect_unique(nodos[a], nodos[b], true)
 
 	# 6) Derivar arreglo de aristas **sin duplicados** desde el Grafo
@@ -199,6 +202,7 @@ func _new_graph() -> void:
 	if info_lbl:
 		info_lbl.text = "{0}\n{1}".format([_hud_text(), _algo_brief()])
 	queue_redraw()
+
 
 # Calcula un peso por distancia entre posiciones (con ruido opcional)
 func _edge_weight_idx(i:int, j:int, noisy:bool=false) -> int:

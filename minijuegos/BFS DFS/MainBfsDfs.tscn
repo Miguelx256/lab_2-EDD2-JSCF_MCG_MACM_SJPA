@@ -45,3 +45,12 @@ offset_left = 102.0
 offset_top = 55.0
 offset_right = 177.0
 offset_bottom = 78.0
+
+[node name="NextLvl" type="Button" parent="."]
+offset_left = 957.0
+offset_top = 324.0
+offset_right = 1151.0
+offset_bottom = 375.0
+text = "Sig. Lvl"
+
+[connection signal="button_down" from="NextLvl" to="." method="_on_dfs_button_2_button_down"]

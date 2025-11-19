@@ -119,18 +119,23 @@ func _select_node(v:int) -> void:
 
 # ---------- Construcción del grafo ----------
 func _new_graph() -> void:
-	s = -1; t = -1; max_flow = 0
-	reveal_flow = false; freeze_info = false
+	s = -1
+	t = -1
+	max_flow = 0
+	reveal_flow = false
+	freeze_info = false
 	nodes_pos.clear()
 	edges.clear()
 	id_compacto.clear()
 
-	Nodo.cid = 0  # asegurar ids 0..N-1
+	# ❌ YA NO usamos Nodo.cid
+	# Nodo.cid = 0
 
 	g = Grafo.new()
 	nodos = []
 	for i in NODE_COUNT:
 		var nd := Nodo.new(str(i))
+		nd.id = i                   # ✅ id explícito 0..NODE_COUNT-1
 		g.agregar_nodo(nd)
 		nodos.append(nd)
 
@@ -141,6 +146,7 @@ func _new_graph() -> void:
 			randf_range(MARGIN, maxf(MARGIN + 1.0, rect.y - MARGIN))
 		))
 
+	# Mapeo de id lógico -> índice compacto 0..N-1
 	for i in NODE_COUNT:
 		id_compacto[nodos[i].id] = i
 
@@ -148,13 +154,14 @@ func _new_graph() -> void:
 	for i in range(1, NODE_COUNT):
 		_connect_unique(nodos[i - 1], nodos[i], _rand_cap())
 
-	# aristas extra
+	# Aristas extra
 	var tries := 0
 	while _edge_count_undirected() < (NODE_COUNT - 1 + EXTRA_EDGES) and tries < 100:
 		tries += 1
 		var a := randi() % NODE_COUNT
 		var b := randi() % NODE_COUNT
-		if a == b: continue
+		if a == b:
+			continue
 		_connect_unique(nodos[a], nodos[b], _rand_cap())
 
 	_build_directed_edges_from_grafo()
@@ -162,9 +169,11 @@ func _new_graph() -> void:
 	_update_info()
 	queue_redraw()
 
+
 func _connect_unique(n1:Nodo, n2:Nodo, cap:int) -> void:
 	if not n1.adyacente.has(n2) and not n2.adyacente.has(n1):
 		g.conectar_nodo(n1, n2, cap)
+
 
 func _edge_count_undirected() -> int:
 	var seen: Dictionary = {}

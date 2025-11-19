@@ -17,10 +17,13 @@ var aristas = []        # lista de diccionarios {origen: Nodo, destino: Nodo, li
 var visitados = []
 var nodo_infectado = null   # nodo visual
 var graph_node: Node2D
+@onready var next_lvl: Button = $NextLvl
+
 
 
 func _ready():
 	randomize()
+	next_lvl.hide()
 
 	grafo_logico = Grafo.new()
 
@@ -182,7 +185,6 @@ func _bfs(inicio_nodo) -> void:
 			continue
 
 		visitados.append(actual)
-		# pintar visual correspondiente
 		var vis = nodos[actual.dato]
 		if vis:
 			if vis.has_method("marcar_visitado"):
@@ -190,7 +192,6 @@ func _bfs(inicio_nodo) -> void:
 			else:
 				vis.modulate = Color(0.2, 1, 0.2)
 
-		# recorrer adyacentes (actual.adyacente es Dictionary o Array de vecinos)
 		for vecino in actual.adyacente:
 			_colorear_arista(actual, vecino)
 			if not vecino in visitados:
@@ -202,6 +203,9 @@ func _bfs(inicio_nodo) -> void:
 	if nodo_infectado:
 		nodo_infectado.modulate = Color(1, 0, 0)
 		$Label4.text = "Nodo infectado: %s" % nodo_infectado.name if nodo_infectado else ""
+
+	# 👉 Aquí ya terminó BFS y el infectado está identificado visualmente
+	next_lvl.show()
 
 
 # --------------------------------------------------------
@@ -229,6 +233,12 @@ func _dfs(nodo) -> void:
 		nodo_infectado.modulate = Color(1, 0, 0)
 		$Label4.text = "Nodo infectado: %s" % nodo_infectado.name if nodo_infectado else ""
 
+	# ⚠️ OJO: esto se ejecuta varias veces por la recursión
+	# mejor mostrar el botón una sola vez solo si aún está oculto:
+	if next_lvl and not next_lvl.visible:
+		next_lvl.show()
+
+
 
 # --------------------------------------------------------
 #                   COLOREAR ARISTA VISUAL
@@ -238,3 +248,7 @@ func _colorear_arista(a, b):
 		if (e.origen == a and e.destino == b) or (e.origen == b and e.destino == a):
 			e.linea.default_color = Color(1.0, 0.6, 0.3)
 			break
+
+
+func _on_dfs_button_2_button_down() -> void:
+	get_tree().change_scene_to_file("res://minijuegos/Caminos Mínimos/DIJKSTRA.tscn")
