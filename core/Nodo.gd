@@ -1,22 +1,20 @@
-extends Node
-# nodo.gd
+# res://core/Nodo.gd
+extends RefCounted
 class_name Nodo
 
-static var cid: int = 0
+var dato:String
+var id:int = -1
+var adyacente:Dictionary = {}   # claves: Nodo, valor: peso (float)
 
-var adyacente: Dictionary = {}  # Nodo -> peso
-var dato: String
-var id: int
-
-func _init(_dato: String = ""):
+func _init(_dato:String):
 	dato = _dato
-	id = cid
-	cid += 1
+	# Si _dato es "0", "1", "2", ... sirve como id numérico
+	if _dato.is_valid_int():
+		id = int(_dato)
 
 
 func agregar_adyacente(nodo: Nodo, peso: float) -> void:
 	adyacente[nodo] = peso
-
 
 func eliminar_adyacente(nodo: Nodo) -> void:
 	adyacente.erase(nodo)

@@ -1,36 +1,32 @@
-# grafo.gd
+# res://core/Grafo.gd
+extends RefCounted
 class_name Grafo
-extends Node
 
-const Nodo = preload("res://core/Nodo.gd")   # ← Ajusta la ruta real
+var lista_adyacencia:Array = []   # Array de Nodo
+var aristas:Array = []            # opcional, para Kruskal/Prim: [{a, b, peso}, ...]
 
-var matriz_adyacencia: Array = []
-var lista_adyacencia: Array[Nodo] = []
-
-
-func _init():
-	lista_adyacencia = []
-
-
-func agregar_nodo(nodo: Nodo) -> void:
-	if nodo not in lista_adyacencia:
+func agregar_nodo(nodo:Nodo) -> void:
+	if not lista_adyacencia.has(nodo):
 		lista_adyacencia.append(nodo)
 
-func conectar_nodo(n1: Nodo, n2: Nodo, peso: float = 1.0) -> void:
-	# Inicializar matriz si está vacía
-	if matriz_adyacencia.is_empty():
-		var size := lista_adyacencia.size()
-		matriz_adyacencia = []
+func conectar_nodo(a:Nodo, b:Nodo, peso:float = 1.0) -> void:
+	# Grafo no dirigido con pesos en diccionario adyacente
 
-		for i in range(size):
-			matriz_adyacencia.append([])
-			for j in range(size):
-				matriz_adyacencia[i].append(0.0)
+	# Para a → b
+	if not a.adyacente.has(b):
+		a.adyacente[b] = peso
+	else:
+		a.adyacente[b] = peso   # por si quieres actualizar peso
 
-	# Conexiones en lista con peso
-	n1.agregar_adyacente(n2, peso)
-	n2.agregar_adyacente(n1, peso)
+	# Para b → a (simétrico)
+	if not b.adyacente.has(a):
+		b.adyacente[a] = peso
+	else:
+		b.adyacente[a] = peso
 
-	# Conexión en matriz con peso
-	matriz_adyacencia[n1.id][n2.id] = peso
-	matriz_adyacencia[n2.id][n1.id] = peso
+	# Guardar también en lista de aristas (si la usas para MST, etc.)
+	aristas.append({
+		"a": a,
+		"b": b,
+		"peso": peso
+	})
