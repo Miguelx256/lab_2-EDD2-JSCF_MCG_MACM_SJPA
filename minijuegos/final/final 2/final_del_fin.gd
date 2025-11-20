@@ -1,39 +1,39 @@
 extends Node2D
 
-@onready var grafo_visual: Node2D = $CanvasLayer/Node2D
-@onready var Grafo = preload("res://core/Grafo.gd")
-@onready var Nodo = preload("res://core/Nodo.gd")
-@onready var final: TextureRect = $CanvasLayer/Final
+@onready var grafo_visual: Node2D      = $CanvasLayer/Node2D
+@onready var final: TextureRect        = $CanvasLayer/Final
 @onready var canvas_layer: CanvasLayer = $CanvasLayer
+@onready var algo_label: Label         = $CanvasLayer/Label
 
-#prueba
+# -------------------- Clases externas -----------------------
+@onready var Grafo = preload("res://core/Grafo.gd")
+@onready var Nodo  = preload("res://core/Nodo.gd")
+
 var grafo
 var etapa_mision_final: int = 1
 var pantalla_ancho: int = 1152
 var pantalla_alto: int = 648
 
+const INF := 1.0e18
+
 func _ready() -> void:
-	canvas_layer.layer = -100  # dibuja detrás de todo
-	final.set_anchors_preset(Control.PRESET_FULL_RECT)
-	final.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	final.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Fondo en la capa de atrás
+	canvas_layer.layer = -100
+	if final:
+		final.set_anchors_preset(Control.PRESET_FULL_RECT)
+		final.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		final.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	randomize()
 	grafo = Grafo.new()
+	_set_stage(1)
 
-
-# -------------------------------------------------------------------
-# BOTÓN: GENERAR GRAFO
-# -------------------------------------------------------------------
 func _on_generar_grafo_button_down() -> void:
-	etapa_mision_final = 1
+	_set_stage(1)
 	generar_grafo_conexo_aleatorio()
 	mostrar_grafo()
 	grafo_visual.queue_redraw()
 
-
-# -------------------------------------------------------------------
-# BOTÓN: VERIFICAR
-# -------------------------------------------------------------------
 func _on_verificar_button_down() -> void:
 	match etapa_mision_final:
 		1:
@@ -45,62 +45,62 @@ func _on_verificar_button_down() -> void:
 		4:
 			ejecutar_etapa_flujo()
 		_:
-			print("Misión final completada.")
+			if algo_label:
+				algo_label.text = "¡Misión final completada!"
 
-
-# -------------------------------------------------------------------
-# GENERAR GRAFO CONEXO DE 5 NODOS
-# -------------------------------------------------------------------
+# ============================================================
+#       GENERACIÓN DE GRAFO CONEXO (5 nodos)
+# ============================================================
 func generar_grafo_conexo_aleatorio() -> void:
-	# Reiniciar grafo (lista de nodos)
+	# Reinicio de la estructura
 	grafo.lista_adyacencia.clear()
-	# Si tenías matriz_adyacencia y ya no la usas, simplemente NO la toques
-	# grafo.matriz_adyacencia.clear()  # ❌ eliminar esta línea si ya no existe
 
 	var total: int = 5
 	var nodos_creados: Array[Nodo] = []
 
-	# 1) Crear nodos y agregarlos al grafo
+	# 1) Crear nodos
 	for i in range(total):
 		var n: Nodo = Nodo.new("N" + str(i))
-		n.id = i  # ✅ id numérico 0..total-1 si lo necesitas en otros lados
+		n.id = i
 		grafo.agregar_nodo(n)
 		nodos_creados.append(n)
 
-	# 2) Construir un árbol aleatorio (para asegurar conectividad)
-	var conectados: Array[Nodo] = [nodos_creados.pop_back()]
+	# 2) Conectividad base (árbol aleatorio)
+	var conectados: Array[Nodo] = []
+	var first: Nodo = nodos_creados.pop_back() as Nodo
+	conectados.append(first)
 
 	while nodos_creados.size() > 0:
-		var nuevo: Nodo = nodos_creados.pop_back()
-		var existente: Nodo = conectados[randi() % conectados.size()]
+		var nuevo: Nodo = nodos_creados.pop_back() as Nodo
+		var existente: Nodo = conectados[randi() % conectados.size()] as Nodo
 		var peso: float = randf_range(1.0, 100.0)
 		grafo.conectar_nodo(existente, nuevo, peso)
 		conectados.append(nuevo)
 
-	# 3) Aristas extra aleatorias
+	# 3) Aristas extra aleatorias (evitando duplicados)
 	var extras: int = randi() % 3
 	for i in range(extras):
-		var a: Nodo = grafo.lista_adyacencia[randi() % grafo.lista_adyacencia.size()]
-		var b: Nodo = grafo.lista_adyacencia[randi() % grafo.lista_adyacencia.size()]
+		var a: Nodo = grafo.lista_adyacencia[randi() % grafo.lista_adyacencia.size()] as Nodo
+		var b: Nodo = grafo.lista_adyacencia[randi() % grafo.lista_adyacencia.size()] as Nodo
 		if a == b:
 			continue
-		# evitar duplicados
 		if a.adyacente.has(b) or b.adyacente.has(a):
 			continue
 		var peso2: float = randf_range(1.0, 100.0)
 		grafo.conectar_nodo(a, b, peso2)
 
-# -------------------------------------------------------------------
-# MOSTRAR GRAFO EN PANTALLA
-# -------------------------------------------------------------------
+# ============================================================
+#                 DIBUJAR / ACTUALIZAR GRAFO
+# ============================================================
 func mostrar_grafo() -> void:
-	var posiciones: Array = []
+	var posiciones: Array[Vector2] = []
 	var aristas: Array = []
 
 	var total: int = grafo.lista_adyacencia.size()
 	if total == 0:
 		return
 
+	# Caja útil donde colocar los nodos
 	var margen_superior: int = 70
 	var margen_inferior: int = 120
 	var x_min: int = 120
@@ -108,23 +108,26 @@ func mostrar_grafo() -> void:
 	var y_min: int = margen_superior + 40
 	var y_max: int = pantalla_alto - margen_inferior - 40
 
-	var centro := Vector2((x_min + x_max) / 2.0, (y_min + y_max) / 2.0)
+	# Distribución elíptica
+	var centro: Vector2 = Vector2((x_min + x_max) / 2.0, (y_min + y_max) / 2.0)
 	var radio_x: float = (x_max - x_min) / 2.0
 	var radio_y: float = (y_max - y_min) / 2.0
 
 	var angulo: float = 0.0
 	var inc: float = TAU / float(total)
 
-	for n in grafo.lista_adyacencia:
-		var pos := centro + Vector2(cos(angulo) * radio_x, sin(angulo) * radio_y)
+	for _nodo in grafo.lista_adyacencia:
+		var pos: Vector2 = centro + Vector2(cos(angulo) * radio_x, sin(angulo) * radio_y)
 		posiciones.append(pos)
 		angulo += inc
 
+	# Reunir aristas (una vez por par i<j)
 	for i in range(total):
 		var nodo = grafo.lista_adyacencia[i]
 		for vecino in nodo.adyacente.keys():
 			var j: int = grafo.lista_adyacencia.find(vecino)
-			if j == -1: continue
+			if j == -1:
+				continue
 			if i < j:
 				var peso: float = float(nodo.adyacente[vecino])
 				aristas.append({
@@ -134,12 +137,10 @@ func mostrar_grafo() -> void:
 					"state": "normal"
 				})
 
+	# grafo_visual debe tener un método set_graph(posiciones, aristas)
 	grafo_visual.set_graph(posiciones, aristas)
 
-
-# -------------------------------------------------------------------
-# MARCAR ARISTAS POR PARES (CAMINO, MST, FLUJO)
-# -------------------------------------------------------------------
+# Marca aristas por pares (para DFS/Dijkstra/MST/Flujo)
 func _marcar_aristas_por_par(pars: Array, estado: String) -> void:
 	for p in pars:
 		for e in grafo_visual.edges:
@@ -147,14 +148,14 @@ func _marcar_aristas_por_par(pars: Array, estado: String) -> void:
 				e["state"] = estado
 	grafo_visual.queue_redraw()
 
-
-# -------------------------------------------------------------------
-# ETAPA 1 – DFS
-# -------------------------------------------------------------------
+# ============================================================
+#                    ETAPA 1 – DFS
+# ============================================================
 func ejecutar_etapa_recorrido() -> void:
 	var sel: Array = grafo_visual.get_selected()
 	if sel.size() == 0:
-		print("Selecciona un nodo para iniciar el recorrido.")
+		if algo_label:
+			algo_label.text = "Selecciona un nodo para iniciar el DFS."
 		return
 
 	var start_idx: int = sel[0]
@@ -163,10 +164,7 @@ func ejecutar_etapa_recorrido() -> void:
 	_dfs_indice(start_idx, visitado, orden)
 
 	grafo_visual.highlight_nodes_in_order(orden, "visited")
-	print("DFS:", orden)
-
-	etapa_mision_final = 2
-
+	_set_stage(2) # pasar a dijkstra
 
 func _dfs_indice(idx: int, visitado: Array, orden: Array) -> void:
 	if idx in visitado:
@@ -180,14 +178,14 @@ func _dfs_indice(idx: int, visitado: Array, orden: Array) -> void:
 		if v_idx != -1:
 			_dfs_indice(v_idx, visitado, orden)
 
-
-# -------------------------------------------------------------------
-# ETAPA 2 – DIJKSTRA
-# -------------------------------------------------------------------
+# ============================================================
+#                ETAPA 2 – DIJKSTRA
+# ============================================================
 func ejecutar_etapa_camino_minimo() -> void:
 	var sel: Array = grafo_visual.get_selected()
 	if sel.size() < 2:
-		print("Selecciona ORIGEN y DESTINO.")
+		if algo_label:
+			algo_label.text = "Selecciona ORIGEN y DESTINO."
 		return
 
 	var origen: int = sel[0]
@@ -195,7 +193,8 @@ func ejecutar_etapa_camino_minimo() -> void:
 
 	var camino: Array = _dijkstra(origen, destino)
 	if camino.size() == 0:
-		print("No existe camino.")
+		if algo_label:
+			algo_label.text = "No existe camino entre los nodos elegidos."
 		return
 
 	var pares: Array = []
@@ -203,10 +202,7 @@ func ejecutar_etapa_camino_minimo() -> void:
 		pares.append([camino[i], camino[i + 1]])
 
 	_marcar_aristas_por_par(pares, "path")
-	print("Camino mínimo:", camino)
-
-	etapa_mision_final = 3
-
+	_set_stage(3) # pasar a MST
 
 func _dijkstra(origen: int, destino: int) -> Array:
 	var n: int = grafo.lista_adyacencia.size()
@@ -223,12 +219,8 @@ func _dijkstra(origen: int, destino: int) -> Array:
 		Q.append(i)
 
 	while Q.size() > 0:
-		Q.sort_custom(func(a, b):
-			if dist[a] < dist[b]: return -1
-			if dist[a] > dist[b]: return 1
-			return 0
-		)
-
+		# En Godot 4, el comparador debe devolver bool
+		Q.sort_custom(func(a, b): return dist[a] < dist[b])
 		var u: int = Q.pop_front()
 		if u == destino:
 			break
@@ -236,7 +228,8 @@ func _dijkstra(origen: int, destino: int) -> Array:
 		var nodo_u = grafo.lista_adyacencia[u]
 		for vecino in nodo_u.adyacente.keys():
 			var v: int = grafo.lista_adyacencia.find(vecino)
-			if v == -1: continue
+			if v == -1:
+				continue
 			var peso: float = float(nodo_u.adyacente[vecino])
 			var alt: float = dist[u] + peso
 			if alt < dist[v]:
@@ -251,13 +244,11 @@ func _dijkstra(origen: int, destino: int) -> Array:
 	while actual != -1:
 		camino.insert(0, actual)
 		actual = prev[actual]
-
 	return camino
 
-
-# -------------------------------------------------------------------
-# ETAPA 3 – MST PRIM
-# -------------------------------------------------------------------
+# ============================================================
+#                 ETAPA 3 – MST (Prim)
+# ============================================================
 func ejecutar_etapa_mst() -> void:
 	var n: int = grafo.lista_adyacencia.size()
 	if n == 0:
@@ -276,7 +267,6 @@ func ejecutar_etapa_mst() -> void:
 				var v: int = grafo.lista_adyacencia.find(vecino)
 				if v == -1 or v in visitado:
 					continue
-
 				var peso: float = float(nodo_u.adyacente[vecino])
 				if peso < mejor_peso:
 					mejor_peso = peso
@@ -289,62 +279,64 @@ func ejecutar_etapa_mst() -> void:
 		aristas_mst.append(mejor_par)
 
 	_marcar_aristas_por_par(aristas_mst, "mst")
-	print("MST:", aristas_mst)
+	_set_stage(4) # pasar a flujo
 
-	etapa_mision_final = 4
-
-
-# -------------------------------------------------------------------
-# ETAPA 4 – FLUJO MÁXIMO (EDMONDS–KARP)
-# -------------------------------------------------------------------
+# ============================================================
+#            ETAPA 4 – FLUJO MÁXIMO (Edmonds–Karp)
+# ============================================================
 func ejecutar_etapa_flujo() -> void:
 	var sel: Array = grafo_visual.get_selected()
 	if sel.size() < 2:
-		print("Selecciona fuente y sumidero.")
+		if algo_label:
+			algo_label.text = "Selecciona FUENTE y SUMIDERO."
 		return
 
 	var s: int = sel[0]
 	var t: int = sel[1]
 
-	var n: int = grafo.lista_adyacencia.size()
-	var capacity := []
-
-	for i in range(n):
-		capacity.append([])
-		for j in range(n):
-			var val: float = 0.0
-			if i < grafo.matriz_adyacencia.size() and j < grafo.matriz_adyacencia[i].size():
-				val = float(grafo.matriz_adyacencia[i][j])
-			capacity[i].append(val)
-
+	var capacity := _build_capacity_from_list()
 	var result := _edmonds_karp(capacity, s, t)
 	var flow = result[0]
 	var maxflow: float = result[1]
 
-	print("Flujo máximo:", maxflow)
-
+	# Visual: aristas con flujo usado y saturadas
+	var n: int = capacity.size()
 	var pares_flow := []
 	var pares_sat := []
-
 	for i in range(n):
 		for j in range(i + 1, n):
 			if capacity[i][j] > 0 or capacity[j][i] > 0:
 				var f: float = flow[i][j]
-				if f > 0:
+				if f > 0.0:
 					pares_flow.append([i, j])
-				if f >= capacity[i][j] and capacity[i][j] > 0:
+				if capacity[i][j] > 0.0 and f >= capacity[i][j]:
 					pares_sat.append([i, j])
 
 	_marcar_aristas_por_par(pares_flow, "flow_used")
 	_marcar_aristas_por_par(pares_sat, "saturated")
 
-	etapa_mision_final = 5
-	print("¡Misión Final COMPLETADA!")
+	_set_stage(5) # completado
+	if algo_label:
+		algo_label.text = "¡Misión final completada! Flujo máximo: %s" % str(maxflow)
 
+# Construye capacidad NxN desde lista_adyacencia (dirigido: i->j)
+func _build_capacity_from_list() -> Array:
+	var n: int = grafo.lista_adyacencia.size()
+	var cap := []
+	for i in range(n):
+		cap.append([])
+		for _j in range(n):
+			cap[i].append(0.0)
+	for i in range(n):
+		var u = grafo.lista_adyacencia[i]
+		for vecino in u.adyacente.keys():
+			var j: int = grafo.lista_adyacencia.find(vecino)
+			if j == -1:
+				continue
+			cap[i][j] = float(u.adyacente[vecino])  # dirigido i→j (tu grafo agrega ambas direcciones)
+	return cap
 
-# -------------------------------------------------------------------
-# EDMONDS–KARP
-# -------------------------------------------------------------------
+# Edmonds–Karp estándar sobre matriz de capacidades
 func _edmonds_karp(capacity: Array, s: int, t: int) -> Array:
 	var n: int = capacity.size()
 
@@ -377,18 +369,13 @@ func _edmonds_karp(capacity: Array, s: int, t: int) -> Array:
 
 			for v in range(n):
 				var residual: float = capacity[u][v] - flow[u][v]
-				if residual > 0 and parent[v] == -1:
+				if residual > 0.0 and parent[v] == -1:
 					parent[v] = u
-
-					if path_cap[u] == INF:
-						path_cap[v] = residual
-					else:
-						path_cap[v] = min(path_cap[u], residual)
-
+					# ternario válido en GDScript 4.x
+					path_cap[v] = residual if path_cap[u] == INF else min(path_cap[u], residual)
 					if v == t:
 						found = true
 						break
-
 					q.append(v)
 
 		if not found:
@@ -396,7 +383,6 @@ func _edmonds_karp(capacity: Array, s: int, t: int) -> Array:
 
 		var increment: float = path_cap[t]
 		var v2: int = t
-
 		while v2 != s:
 			var u2: int = parent[v2]
 			flow[u2][v2] += increment
@@ -406,3 +392,24 @@ func _edmonds_karp(capacity: Array, s: int, t: int) -> Array:
 		maxflow += increment
 
 	return [flow, maxflow]
+
+# ============================================================
+#          Texto del Label según la etapa / helper
+# ============================================================
+func _set_stage(n:int) -> void:
+	etapa_mision_final = n
+	if algo_label:
+		algo_label.text = _texto_etapa(n)
+
+func _texto_etapa(n:int) -> String:
+	match n:
+		1:
+			return "Etapa 1: Recorrido (DFS)\nSelecciona un nodo y presiona Verificar."
+		2:
+			return "Etapa 2: Camino mínimo (Dijkstra)\nSelecciona ORIGEN y DESTINO; luego Verificar."
+		3:
+			return "Etapa 3: Árbol de Expansión Mínima (Prim)\nPresiona Verificar para construir el AEM."
+		4:
+			return "Etapa 4: Flujo Máximo (Edmonds–Karp)\nSelecciona FUENTE y SUMIDERO; luego Verificar."
+		_:
+			return "¡Misión final completada!"
