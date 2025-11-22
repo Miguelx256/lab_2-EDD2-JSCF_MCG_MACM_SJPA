@@ -39,7 +39,8 @@ func _ready():
 
 	$"bfs button".pressed.connect(_on_bfs_pressed)
 	$"dfs button".pressed.connect(_on_dfs_pressed)
-	$Label.text = "Selecciona BFS o DFS para iniciar el rastreo."
+	$Label.text = "Los rastros de NEMESIS han infectado el firewall central
+	Misión: Selecciona BFS o DFS para iniciar el rastreo y encontrar la raiz del virus."
 	$Label4.text = ""
 
 
@@ -148,7 +149,7 @@ func _on_bfs_pressed():
 	if nodo_infectado:
 		nodo_infectado.modulate = Color(1, 0, 0)
 	$Label.text = "Rastreo BFS desde %s" % inicio.dato
-	$Label4.text = "Nodo infectado: %s" % nodo_infectado.name if nodo_infectado else ""
+	$Label4.text = "Rastreo completado. Has encontrado el nodo raíz del virus."
 
 func _on_dfs_pressed():
 	_reiniciar()
@@ -158,7 +159,8 @@ func _on_dfs_pressed():
 	if nodo_infectado:
 		nodo_infectado.modulate = Color(1, 0, 0)
 	$Label.text = "Rastreo DFS desde %s" % inicio.dato
-	$Label4.text = "Nodo infectado: %s" % nodo_infectado.name if nodo_infectado else ""
+	$Label4.text = "Rastreo completado. Has encontrado el nodo raíz del virus.
+    Siguiente misión: calcular la ruta más segura para aislarlo."
 
 
 # --------------------------------------------------------

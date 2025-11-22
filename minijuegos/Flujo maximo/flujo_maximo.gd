@@ -1,11 +1,5 @@
 extends Control
 # Flujo Máximo (Edmonds–Karp) usando clases externas Grafo/Nodo
-# Godot 4.5
-# Hijos requeridos del Control raíz:
-#   - NewButton   : Button
-#   - ClearButton : Button
-#   - CheckButton : Button
-#   - InfoLabel   : Label
 
 const NODE_COUNT      : int = 4
 const EXTRA_EDGES     : int = 2
@@ -14,10 +8,10 @@ const EDGE_THICKNESS  : float = 3.0
 const NODE_HIT_DIST   : float = 18.0
 const MARGIN          : float = 64.0
 
-const SOURCE_COLOR        : Color = Color(0.10, 0.25, 0.90)  # azul oscuro
-const SINK_COLOR          : Color = Color(0.20, 0.85, 0.40)  # verde
-const NODE_BASE_INNER     : Color = Color(0.92, 0.96, 1.00)
-const NODE_BASE_BORDER    : Color = Color(0.15, 0.20, 0.28)
+const SOURCE_COLOR        : Color = Color(0.10, 0.25, 0.90)  # azul oscuro (fuente)
+const SINK_COLOR          : Color = Color(0.20, 0.85, 0.40)  # verde (sumidero)
+const NODE_BASE_INNER     : Color = Color(0.0, 0.0, 0.0)     # interior negro
+const NODE_BASE_BORDER    : Color = Color(0.4, 0.4, 0.4)     # borde gris medio
 @onready var next_lvl: Button = $NextLVL
 @onready var bg: CanvasLayer = $BG
 @onready var flujo: TextureRect = $BG/Flujo
@@ -425,11 +419,15 @@ func _draw() -> void:
 		draw_string(font, r.position + Vector2(4, ts.y),
 			text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(1,1,1))
 
-	# Nodos (S=azul, T=verde)
+	# Nodos: base negro con borde gris, fuente azul, sumidero verde
 	for i in nodes_pos.size():
 		var inner := NODE_BASE_INNER
-		if i == s: inner = SOURCE_COLOR
-		elif i == t: inner = SINK_COLOR
+		if i == s:
+			inner = SOURCE_COLOR
+		elif i == t:
+			inner = SINK_COLOR
+
+		# borde gris + interior (negro o color de fuente/sumidero)
 		draw_circle(nodes_pos[i], NODE_RADIUS, NODE_BASE_BORDER)
 		draw_circle(nodes_pos[i], NODE_RADIUS - 3.0, inner)
 
@@ -437,7 +435,16 @@ func _draw() -> void:
 		var f := get_theme_default_font()
 		var sz := 18
 		var tsize := f.get_string_size(lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, sz)
-		draw_string(f, nodes_pos[i] - tsize*0.5 + Vector2(0, tsize.y*0.35), lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, sz, Color.BLACK)
+		# texto blanco para buen contraste sobre negro/azul/verde
+		draw_string(
+			f,
+			nodes_pos[i] - tsize * 0.5 + Vector2(0, tsize.y * 0.35),
+			lbl,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			sz,
+			Color(1, 1, 1)
+		)
 
 func _draw_arrow(a:Vector2, b:Vector2, col:Color, width:float) -> void:
 	var dir := b - a

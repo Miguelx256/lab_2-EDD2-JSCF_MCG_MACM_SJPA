@@ -1,7 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://bpwmumtklv5pu"]
+[gd_scene load_steps=8 format=3 uid="uid://bpwmumtklv5pu"]
 
 [ext_resource type="Script" uid="uid://dyoru4c5pipjr" path="res://minijuegos/Arbol de expansión mínima/expansión_mínima.gd" id="1_ld67p"]
 [ext_resource type="Texture2D" uid="uid://c2iqo6g8yr6pn" path="res://recursos/arbol.png" id="2_7a0qm"]
+[ext_resource type="Texture2D" uid="uid://2vuc3amnte27" path="res://recursos/pc network.png" id="3_mkxu3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mkxu3"]
+bg_color = Color(0.25329417, 0.4001011, 0.76619005, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7nk8h"]
+bg_color = Color(0.49460483, 0.6317702, 0.62686527, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rddv4"]
+bg_color = Color(0.18866926, 0.70905674, 0.381314, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7a0qm"]
+bg_color = Color(0.8117647, 0.14117648, 0.12156863, 1)
 
 [node name="ExpansiónMínima" type="Control"]
 layout_mode = 3
@@ -21,34 +34,37 @@ texture = ExtResource("2_7a0qm")
 
 [node name="NewButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 119.0
+offset_left = 31.0
 offset_top = 576.0
-offset_right = 295.0
+offset_right = 207.0
 offset_bottom = 635.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_mkxu3")
 text = "Generar nuevo grafo"
 
 [node name="ClearButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 848.0
+offset_left = 454.0
 offset_top = 576.0
-offset_right = 1029.0
+offset_right = 635.0
 offset_bottom = 635.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_7nk8h")
 text = "Limpiar"
 
 [node name="CheckButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 489.0
-offset_top = 577.0
-offset_right = 675.0
-offset_bottom = 635.0
+offset_left = 240.0
+offset_top = 576.0
+offset_right = 426.0
+offset_bottom = 634.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_rddv4")
 text = "Verificar Algoritmo"
 
 [node name="InfoLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 2.0
-offset_top = -4.0
+offset_top = 32.0
 offset_right = 299.0
-offset_bottom = 80.0
+offset_bottom = 116.0
 text = "a"
 
 [node name="AlgoPopup" type="PopupPanel" parent="."]
@@ -57,10 +73,24 @@ visible = true
 
 [node name="NextLVL" type="Button" parent="."]
 layout_mode = 0
-offset_left = 949.0
-offset_top = 17.0
-offset_right = 1130.0
-offset_bottom = 76.0
-text = "Sig. Nivel"
+offset_left = 912.0
+offset_top = 534.0
+offset_right = 1141.0
+offset_bottom = 638.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_7a0qm")
+text = "NEXT LEVEL"
+
+[node name="InfoLabel2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 647.0
+offset_bottom = 86.0
+text = "Misión: Reconstruye la red de computadoras con los menores costos posibles"
+
+[node name="PcNetwork" type="Sprite2D" parent="."]
+position = Vector2(932.00006, 83)
+scale = Vector2(0.33203125, 0.30078125)
+texture = ExtResource("3_mkxu3")
 
 [connection signal="button_down" from="NextLVL" to="." method="_on_next_lvl_button_down"]

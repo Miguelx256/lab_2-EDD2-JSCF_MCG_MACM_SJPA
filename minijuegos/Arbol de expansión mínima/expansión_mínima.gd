@@ -150,9 +150,6 @@ func _new_graph() -> void:
 	freeze_info = false
 	info_cache = ""
 
-	# ❌ Ya NO usamos Nodo.cid
-	# Nodo.cid = 0   <-- elimina esta línea
-
 	# 1) Crear N nodos
 	g = Grafo.new()
 	nodos = []
@@ -309,9 +306,9 @@ func _build_adjacency() -> Array:
 	for u in NODE_COUNT:
 		adj[u] = []
 	for i in edges.size():
-		var e := edges[i]
-		adj[e.a].append({"v": e.b, "idx": i, "w": e.w})
-		adj[e.b].append({"v": e.a, "idx": i, "w": e.w})
+			var e := edges[i]
+			adj[e.a].append({"v": e.b, "idx": i, "w": e.w})
+			adj[e.b].append({"v": e.a, "idx": i, "w": e.w})
 	return adj
 
 func _compute_mst_prim() -> void:
@@ -401,7 +398,7 @@ func _clear_selection() -> void:
 
 func _on_check() -> void:
 	var res := _validate_selection()
-	var status_text := "¡Ganaste, has reeconstruido los servidores!" if res.code == "OK" else "Has fallado la misión..."
+	var status_text := "Reconstrucción completada. Todos los servidores vuelven a estar sincronizados" if res.code == "OK" else "Has fallado la misión..."
 	var detail := ""
 	
 	match res.code:
@@ -528,15 +525,28 @@ func _draw() -> void:
 		draw_rect(r, bg, true, 6.0)
 		draw_string(font, r.position + Vector2(4, ts.y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, fg)
 
-	# Nodos
+	# Nodos (rojo medio oscuro)
 	for i in nodes_pos.size():
-		draw_circle(nodes_pos[i], NODE_RADIUS, Color(0.15,0.2,0.28))
-		draw_circle(nodes_pos[i], NODE_RADIUS-3.0, Color(0.9,0.95,1.0))
+		var outer_color := Color(0.35, 0.05, 0.05)   # rojo oscuro
+		var inner_color := Color(0.7, 0.2, 0.2)      # rojo medio tirando a oscuro
+
+		draw_circle(nodes_pos[i], NODE_RADIUS, outer_color)
+		draw_circle(nodes_pos[i], NODE_RADIUS - 3.0, inner_color)
+
 		var label_text := str(i)
 		var f := get_theme_default_font()
 		var s := 18
 		var tsize := f.get_string_size(label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, s)
-		draw_string(f, nodes_pos[i] - tsize*0.5 + Vector2(0, tsize.y*0.35), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, s, Color.BLACK)
+		# Texto casi blanco para buen contraste
+		draw_string(
+			f,
+			nodes_pos[i] - tsize * 0.5 + Vector2(0, tsize.y * 0.35),
+			label_text,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			s,
+			Color(1.0, 0.98, 0.98)
+		)
 
 func _process(_dt: float) -> void:
 	if not info_lbl:

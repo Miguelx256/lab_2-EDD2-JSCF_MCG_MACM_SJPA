@@ -1,7 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://et5bp527w38s"]
+[gd_scene load_steps=8 format=3 uid="uid://et5bp527w38s"]
 
 [ext_resource type="Script" uid="uid://cydb7obiv0ls" path="res://minijuegos/Flujo maximo/flujo_maximo.gd" id="1_uhwsw"]
 [ext_resource type="Texture2D" uid="uid://kgauhag0b56i" path="res://recursos/flujo.png" id="2_ohdhm"]
+[ext_resource type="Texture2D" uid="uid://chgicokybq31v" path="res://recursos/flujo de datos.png" id="3_8f4qr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mtarb"]
+bg_color = Color(0.2007024, 0.6685269, 0.74091685, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ppyil"]
+bg_color = Color(0.6742195, 0.5825647, 0.48914725, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1rbkg"]
+bg_color = Color(0.23685184, 0.5889333, 0.21916315, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0oy0r"]
+bg_color = Color(0.17984475, 0.05075801, 0.06804532, 1)
 
 [node name="FlujoMaximo" type="Control"]
 layout_mode = 3
@@ -21,37 +34,56 @@ offset_left = 26.0
 offset_top = 560.0
 offset_right = 212.0
 offset_bottom = 620.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_mtarb")
 text = "Generar nuevo grafo"
 
 [node name="ClearButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 945.0
-offset_top = 560.0
-offset_right = 1110.0
-offset_bottom = 622.0
+offset_left = 473.0
+offset_top = 559.0
+offset_right = 638.0
+offset_bottom = 619.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_ppyil")
 text = "Limpiar"
 
 [node name="CheckButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 487.0
+offset_left = 256.0
 offset_top = 560.0
-offset_right = 664.0
+offset_right = 433.0
 offset_bottom = 619.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_1rbkg")
 text = "Verificar algoritmo"
 
 [node name="InfoLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 1.0
-offset_top = 2.0
+offset_top = 57.0
 offset_right = 855.0
-offset_bottom = 76.0
+offset_bottom = 131.0
 
 [node name="NextLVL" type="Button" parent="."]
 layout_mode = 0
-offset_left = 945.0
-offset_top = 65.0
-offset_right = 1110.0
-offset_bottom = 127.0
-text = "Sig. Nivel"
+offset_left = 927.0
+offset_top = 542.0
+offset_right = 1143.0
+offset_bottom = 639.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_0oy0r")
+text = "FINAL LEVEL
+"
+
+[node name="FlujoDeDatos" type="Sprite2D" parent="."]
+position = Vector2(848.4736, 68.157745)
+scale = Vector2(0.28309983, 0.24938385)
+texture = ExtResource("3_8f4qr")
+
+[node name="InfoLabel2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 767.0
+offset_bottom = 76.0
+text = "NEMESIS está sobrecargando el sistema enviando datos corruptos
+Misión: Maximiza el flujo de datos seguros desde el centro de control hasta el servidor de respaldo"
 
 [connection signal="button_down" from="NextLVL" to="." method="_on_clear_button_2_button_down"]

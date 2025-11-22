@@ -1,7 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://2066tby8xgh4"]
+[gd_scene load_steps=7 format=3 uid="uid://2066tby8xgh4"]
 
 [ext_resource type="Script" uid="uid://uqfuccewecvf" path="res://minijuegos/BFS DFS/main_bfs_dfs.gd" id="1_yqpqw"]
 [ext_resource type="Texture2D" uid="uid://lyfx13y20fsl" path="res://recursos/bfs dfs.png" id="2_gqhde"]
+[ext_resource type="Texture2D" uid="uid://drde4dqkj8iux" path="res://recursos/firewall.png" id="3_ckuod"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gqhde"]
+bg_color = Color(0.17888838, 0.47493416, 0.79308563, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ckuod"]
+bg_color = Color(0.28074336, 0.62272626, 0.3651262, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7art8"]
+bg_color = Color(0.8117647, 0.14117648, 0.12156863, 1)
 
 [node name="MainBfsDfs" type="Node2D"]
 script = ExtResource("1_yqpqw")
@@ -16,49 +26,45 @@ texture = ExtResource("2_gqhde")
 [node name="graph" type="Node2D" parent="."]
 
 [node name="bfs button" type="Button" parent="."]
-offset_left = 956.0
-offset_top = 132.0
-offset_right = 1149.0
-offset_bottom = 189.0
+offset_left = 55.0
+offset_top = 550.0
+offset_right = 240.0
+offset_bottom = 633.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_gqhde")
+text = "Aplicar BFS"
 
 [node name="dfs button" type="Button" parent="."]
-offset_left = 957.0
-offset_top = 232.0
-offset_right = 1151.0
-offset_bottom = 283.0
+offset_left = 319.0
+offset_top = 550.0
+offset_right = 513.0
+offset_bottom = 630.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_ckuod")
+text = "Aplicar DFS"
 
 [node name="Label" type="Label" parent="."]
-offset_left = 106.0
-offset_top = 15.0
-offset_right = 181.0
-offset_bottom = 38.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 636.0
+offset_bottom = 70.0
 text = "aaaaaaaa"
 
-[node name="Label2" type="Label" parent="."]
-offset_left = 1038.0
-offset_top = 147.0
-offset_right = 1078.0
-offset_bottom = 170.0
-text = "BFS"
-
-[node name="Label3" type="Label" parent="."]
-offset_left = 1033.0
-offset_top = 245.0
-offset_right = 1069.0
-offset_bottom = 268.0
-text = "DFS"
-
 [node name="Label4" type="Label" parent="."]
-offset_left = 102.0
+offset_left = 5.0
 offset_top = 55.0
-offset_right = 177.0
-offset_bottom = 78.0
+offset_right = 570.0
+offset_bottom = 122.0
 
 [node name="NextLvl" type="Button" parent="."]
-offset_left = 957.0
-offset_top = 324.0
-offset_right = 1151.0
-offset_bottom = 375.0
-text = "Sig. Lvl"
+offset_left = 919.0
+offset_top = 553.0
+offset_right = 1145.0
+offset_bottom = 636.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_7art8")
+text = "NEXT LEVEL"
+
+[node name="Firewall" type="Sprite2D" parent="."]
+position = Vector2(538.783, 50.68356)
+scale = Vector2(0.43888888, 0.40555555)
+texture = ExtResource("3_ckuod")
 
 [connection signal="button_down" from="NextLvl" to="." method="_on_dfs_button_2_button_down"]

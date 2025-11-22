@@ -160,8 +160,8 @@ func _check():
 
 	info_lbl.text = (
 		"Camino jugador: %s (%.2f)\n"
-		+ "Dijkstra: %s (%.2f)\n\n"
-		+ ("GANASTE 🎉" if win else "PERDISTE ❌")
+		+ "Dijkstra: %s (%.2f)"
+		+ (" Seguridad del sistema restaurada correctamente!")
 	) % [str(camino_jugador), player_cost, str(dijkstra_path), dijkstra_cost]
 
 	# --- ocultar botones si gana ---

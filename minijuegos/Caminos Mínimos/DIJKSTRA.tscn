@@ -1,7 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://chr26erbynao6"]
+[gd_scene load_steps=7 format=3 uid="uid://chr26erbynao6"]
 
 [ext_resource type="Script" uid="uid://0ivywkrclma1" path="res://DIJKSTRA.gd" id="1_pxyci"]
 [ext_resource type="Texture2D" uid="uid://chrubi3ldrshn" path="res://recursos/dijkstra.png" id="2_jxg6e"]
+[ext_resource type="Texture2D" uid="uid://dtidui27dhvwa" path="res://recursos/servers.png" id="3_k1tfn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k1tfn"]
+bg_color = Color(0.3001818, 0.6737538, 0.6230276, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ys4rr"]
+bg_color = Color(0.2291421, 0.5016201, 0.6102966, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jxg6e"]
+bg_color = Color(0.8117647, 0.14117648, 0.12156863, 1)
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -28,30 +38,50 @@ text = "NEW"
 [node name="ClearButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 896.0
-offset_top = 384.0
-offset_right = 1024.0
-offset_bottom = 448.0
+offset_top = 261.0
+offset_right = 1114.0
+offset_bottom = 370.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_k1tfn")
 text = "CLEAR"
 
 [node name="CheckButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 896.0
-offset_top = 302.0
-offset_right = 1024.0
-offset_bottom = 366.0
+offset_top = 123.0
+offset_right = 1113.0
+offset_bottom = 234.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_ys4rr")
 text = "CHECK"
 
 [node name="InfoLabel" type="Label" parent="."]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+offset_left = 358.0
+offset_top = 3.0
+offset_right = 881.0
+offset_bottom = 76.0
 
 [node name="NextLvl" type="Button" parent="."]
 layout_mode = 0
-offset_left = 896.0
-offset_top = 463.0
-offset_right = 1024.0
-offset_bottom = 527.0
+offset_left = 903.0
+offset_top = 528.0
+offset_right = 1145.0
+offset_bottom = 640.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jxg6e")
 text = "NEXT LEVEL"
+
+[node name="InfoLabel2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 4.0
+offset_right = 310.0
+offset_bottom = 81.0
+text = "Mision: Traza la ruta mas segura 
+entre los nodos de colores usando el
+algoritmo de Dijkstra"
+
+[node name="Servers" type="Sprite2D" parent="."]
+position = Vector2(106.5, 542.5)
+scale = Vector2(0.38085938, 0.37695313)
+texture = ExtResource("3_k1tfn")
 
 [connection signal="button_down" from="NextLvl" to="." method="_on_next_lvl_button_down"]
