@@ -63,7 +63,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_7art8")
 text = "NEXT LEVEL"
 
 [node name="Firewall" type="Sprite2D" parent="."]
-position = Vector2(538.783, 50.68356)
+position = Vector2(1072, 73)
 scale = Vector2(0.43888888, 0.40555555)
 texture = ExtResource("3_ckuod")
 
